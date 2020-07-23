@@ -26,6 +26,28 @@ cross_prob <- function(g, d,
   return(out)
 }
 
+#' Calculate the upper bound on the boundary crossing probability by using      Lorden's formula.
+#'
+#' Constant threshold for well-seperated case.
+#'
+#' @inheritParams cross_prob
+#'
+#' @return The upper bound on the boundary crossing probability based on Lorden's formula
+#' @export
+#'
+#' @examples
+#' cross_prob_lorden(1, 1)
+#' cross_prob_lorden(1, 2)
+cross_prob_lorden <- function(g, d){
+  if (g / d <= 1) {
+    out <- exp(-g)
+  } else {
+    out <- (1 + g/d) * exp(-g)
+  }
+  return(out)
+}
+
+
 #' Calculate the upper bound on the boundary crossing probability by using a grid-search
 #'
 #' Constant threshold for well-seperated case.
