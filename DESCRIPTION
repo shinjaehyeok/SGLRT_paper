@@ -17,3 +17,5 @@ Suggests:
     testthat
 URL: https://github.com/shinjaehyeok/SGLRT
 BugReports: https://github.com/shinjaehyeok/SGLRT/issues
+Imports: 
+    stats

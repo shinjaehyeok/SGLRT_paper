@@ -4,14 +4,14 @@
 \alias{cross_prob_search}
 \title{Calculate the upper bound on the boundary crossing probability by using a grid-search}
 \usage{
-cross_prob_search(g, d, m_upper = 1000)
+cross_prob_search(g, d, m_upper = 1000L)
 }
 \arguments{
 \item{g}{Constant threshold (positive numeric).}
 
 \item{d}{Bregman divergence between the null and alternative spaces (positive numeric).}
 
-\item{m_upper}{Upper bound on the grid-search for m (default = 1e+3).}
+\item{m_upper}{Upper bound on the grid-search for m (default = 1e+3L).}
 }
 \value{
 Grid-search result of the upper bound on the boundary crossing probability based on Theorem 1.
@@ -21,5 +21,5 @@ Constant threshold for well-seperated case.
 }
 \examples{
 cross_prob_search(1, 1)
-cross_prob_search(2, 1, m_upper = 500)
+cross_prob_search(2, 1, m_upper = 500L)
 }

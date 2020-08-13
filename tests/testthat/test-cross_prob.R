@@ -28,3 +28,15 @@ test_that("Minimum of cross_prob_searchs over m spaces should be smaller than on
   # lines(out$eta, log(out$prob), type = "l")
 
 })
+
+test_that("const_boundary must yield accurate prob bound",{
+  alpha <- 10^seq(-1,-15)
+  theta_vec <- c(1,0.5,0.1,0.01,0.005,0.001,0.0001,0.00001)
+  d_vec <- theta_vec^2 / 2
+  for (a in alpha){
+    prob <- sapply(d_vec, function(d) const_boundary(a,d)$prob)
+    expect_true(max(abs(prob-a)) < 1e-12)
+    prob_lorden <- sapply(d_vec, function(d) const_boundary_lorden(a,d)$prob)
+    expect_true(max(abs(prob_lorden-a)) < 1e-8)
+  }
+})
