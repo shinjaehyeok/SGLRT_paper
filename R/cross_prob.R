@@ -97,7 +97,7 @@ cross_prob_search <- function(g, d,
 #' @param d Bregman divergence between the null and alternative spaces (positive numeric).
 #' @param m_upper Upper bound on the grid-search for m (default = 1e+3L).
 #'
-#' @return Constant threshold for GLR-lik statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on Theorem 1.
+#' @return Constant threshold for GLR-like statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on Theorem 1.
 #' @export
 #' @examples
 #' const_boundary(0.05, .1)
