@@ -14,7 +14,7 @@ const_boundary(alpha, d, m_upper = 1000L)
 \item{m_upper}{Upper bound on the grid-search for m (default = 1e+3L).}
 }
 \value{
-Constant threshold for GLR-lik statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on Theorem 1.
+Constant threshold for GLR-like statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on Theorem 1.
 }
 \description{
 Constant threshold for well-seperated case.
