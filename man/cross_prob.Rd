@@ -4,14 +4,14 @@
 \alias{cross_prob}
 \title{Calculate the upper bound on the boundary crossing probability.}
 \usage{
-cross_prob(g, d, eta = 1.36)
+cross_prob(g, d, eta = 1.1)
 }
 \arguments{
 \item{g}{Constant threshold (positive numeric).}
 
 \item{d}{Bregman divergence between the null and alternative spaces (positive numeric).}
 
-\item{eta}{Peeling size (default = 1.36).}
+\item{eta}{Peeling size (default = 1.1).}
 }
 \value{
 The upper bound on the boundary crossing probability based on Theorem 1 and corresponding K value.
