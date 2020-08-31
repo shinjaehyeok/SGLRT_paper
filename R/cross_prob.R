@@ -4,7 +4,7 @@
 #'
 #' @param g Constant threshold (positive numeric).
 #' @param d Bregman divergence between the null and alternative spaces (positive numeric).
-#' @param eta Peeling size (default = 1.36).
+#' @param eta Peeling size (default = 1.1).
 #'
 #' @return The upper bound on the boundary crossing probability based on Theorem 1 and corresponding K value.
 #' @export
@@ -12,7 +12,7 @@
 #' cross_prob(1, 1)
 #' cross_prob(2, 1, eta = 2)
 cross_prob <- function(g, d,
-                       eta = 1.36) {
+                       eta = 1.1) {
   if (min(g, d) <= 0) stop("g and d must be a positive number.")
   if (g/d <= 1) {
     prob <- exp(-g)
