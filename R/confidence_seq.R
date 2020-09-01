@@ -20,7 +20,7 @@ cross_prob_cs <- function(g, nmax,
 
   if (nmin == nmax){
     prob <- exp(-g)
-    K <- 1
+    K <- 0L
     out <- list(prob = prob,
                 K = K)
     return(out)
@@ -64,7 +64,7 @@ cross_prob_cs_search <- function(g, nmax,
 
   if (nmin == nmax) {
     prob <- exp(-g)
-    K <- 1
+    K <- 0L
     out <- list(prob = prob,
                 K = K,
                 eta = NA)
