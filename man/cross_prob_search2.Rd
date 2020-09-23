@@ -21,7 +21,3 @@ Grid-search result of the upper bound on the boundary crossing probability based
 \description{
 Constant threshold for well-seperated case.
 }
-\examples{
-cross_prob_search2(1, 1)
-cross_prob_search2(2, 1, eta_upper = 5, eta_grid_size = 0.5)
-}

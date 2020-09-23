@@ -174,10 +174,7 @@ const_boundary_lorden <- function(alpha, d) {
 #' @param eta_grid_size Grid size for the grid-search for eta (default = 0.05).
 
 #' @return Grid-search result of the upper bound on the boundary crossing probability based on Theorem 1.
-#' @export
-#' @examples
-#' cross_prob_search2(1, 1)
-#' cross_prob_search2(2, 1, eta_upper = 5, eta_grid_size = 0.5)
+
 cross_prob_search2 <- function(g, d,
                               eta_upper = g/d,
                               eta_grid_size = 0.05) {

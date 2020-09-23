@@ -16,7 +16,7 @@ cross_prob_cs(g, nmax, nmin = 1L, eta = 1.1)
 \item{eta}{Peeling size (default = 1.1).}
 }
 \value{
-The upper bound on the boundary crossing probability for confidence seqeuneces and corresponding K value.
+The upper bound on the boundary crossing probability for confidence sequeneces and corresponding K value.
 }
 \description{
 Constant threshold with finite target time interval.
