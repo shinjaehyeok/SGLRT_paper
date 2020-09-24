@@ -7,10 +7,10 @@
 #' @param eta Peeling size (default = 1.1).
 #'
 #' @return The upper bound on the boundary crossing probability based on Theorem 1 and corresponding K value.
-#' @export
-#' @examples
-#' cross_prob(1, 1)
-#' cross_prob(2, 1, eta = 2)
+# @export
+# @examples
+# cross_prob(1, 1)
+# cross_prob(2, 1, eta = 2)
 cross_prob <- function(g, d,
                        eta = 1.1) {
   if (min(g, d) <= 0) stop("g and d must be a positive number.")
@@ -37,11 +37,11 @@ cross_prob <- function(g, d,
 #' @inheritParams cross_prob
 #'
 #' @return The upper bound on the boundary crossing probability based on Lorden's formula
-#' @export
-#'
-#' @examples
-#' cross_prob_lorden(1, 1)
-#' cross_prob_lorden(1, 2)
+# @export
+#
+# @examples
+# cross_prob_lorden(1, 1)
+# cross_prob_lorden(1, 2)
 cross_prob_lorden <- function(g, d){
   if (g / d <= 1) {
     out <- exp(-g)
@@ -61,10 +61,10 @@ cross_prob_lorden <- function(g, d){
 #' @param m_upper Upper bound on the grid-search for m (default = 1e+3L).
 
 #' @return Grid-search result of the upper bound on the boundary crossing probability based on Theorem 1.
-#' @export
-#' @examples
-#' cross_prob_search(1, 1)
-#' cross_prob_search(2, 1, m_upper = 500L)
+# @export
+# @examples
+# cross_prob_search(1, 1)
+# cross_prob_search(2, 1, m_upper = 500L)
 cross_prob_search <- function(g, d,
                        m_upper = 1e+3L) {
 
@@ -98,10 +98,10 @@ cross_prob_search <- function(g, d,
 #' @param m_upper Upper bound on the grid-search for m (default = 1e+3L).
 #'
 #' @return Constant threshold for GLR-like statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on Theorem 1.
-#' @export
-#' @examples
-#' const_boundary(0.05, .1)
-#' const_boundary(0.025, 1e-3, m_upper = 100L)
+# @export
+# @examples
+# const_boundary(0.05, .1)
+# const_boundary(0.025, 1e-3, m_upper = 100L)
 const_boundary <- function(alpha, d,
                            m_upper = 1e+3L) {
   if (alpha < 1e-16 | alpha > 0.5) stop("alpha must be in [1e-16,0.5].")

@@ -21,9 +21,3 @@ The upper bound on the boundary crossing probability based on Theorem 1.
 \description{
 Time-varying threshold for the non-separation case.
 }
-\examples{
-g_fun <- function(n) 5 + 2 * log(1 + log(n))
-exp_g_fun <- function(k, eta) exp(-5 / eta) / (1 + k * log(eta))^(2/eta)
-cross_prob_varying(g_fun, eta = 1.1)
-cross_prob_varying(g_fun = NULL, exp_g_fun, eta = 2)
-}

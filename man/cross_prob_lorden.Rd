@@ -17,7 +17,3 @@ The upper bound on the boundary crossing probability based on Lorden's formula
 \description{
 Constant threshold for well-seperated case.
 }
-\examples{
-cross_prob_lorden(1, 1)
-cross_prob_lorden(1, 2)
-}

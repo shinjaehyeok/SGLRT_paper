@@ -1,17 +1,17 @@
-#' Calculate the upper bound on the boundary crossing probability for confidence sequences.
+#' Upper bound on the boundary crossing probability for confidence sequences.
 #'
-#' Constant threshold with finite target time interval.
+#' \code{cross_prop_cs} is used to compute the constant threshold for the GLR-like confidence sequences with finite target time interval.
 #'
 #' @param g Constant threshold (positive numeric).
 #' @param nmax Upper bound of the target time interval
 #' @param nmin Lower bound of the target time interval (default = 1L)
 #' @param eta Peeling size (default = 1.1).
 #'
-#' @return The upper bound on the boundary crossing probability for confidence sequeneces and corresponding K value.
-#' @export
-#' @examples
-#' cross_prob_cs(1, 1e+6)
-#' cross_prob_cs(2, 1e+8, 1e+2, eta = 2)
+#' @return The upper bound on the boundary crossing probability for confidence sequences and corresponding K value.
+# @export
+# @examples
+# cross_prob_cs(1, 1e+6)
+# cross_prob_cs(2, 1e+8, 1e+2, eta = 2)
 cross_prob_cs <- function(g, nmax,
                           nmin = 1L,
                           eta = 1.1) {
@@ -41,20 +41,21 @@ cross_prob_cs <- function(g, nmax,
   return(out)
 }
 
-#' Calculate the upper bound on the boundary crossing probability for confidence sequences by using a grid-search.
+
+#' Grid-searching the upper bound on the boundary crossing probability for confidence sequences.
 #'
-#' Constant threshold with finite target time interval.
+#' \code{cross_prob_cs_search} is used to grid-search the constant threshold for the GLR-like confidence sequences with finite target time interval.
 #'
 #' @param g Constant threshold (positive numeric).
 #' @param nmax Upper bound of the target time interval.
 #' @param nmin Lower bound of the target time interval. (default = 1L)
-#' @param m_upper Upper bound on the grid-search for m (default = 1e+3L).
+#' @param m_upper Upper bound on the grid for searching m value. (default = 1e+3L)
 
 #' @return Grid-search result of the upper bound on the boundary crossing probability for confidence sequences.
-#' @export
-#' @examples
-#' cross_prob_cs_search(1, 1e+6)
-#' cross_prob_cs_search(2, 1e+8, 1e+2, m_upper = 500L)
+# @export
+# @examples
+# cross_prob_cs_search(1, 1e+6)
+# cross_prob_cs_search(2, 1e+8, 1e+2, m_upper = 500L)
 cross_prob_cs_search <- function(g, nmax,
                               nmin = 1L,
                               m_upper = 1e+3L) {
@@ -87,9 +88,9 @@ cross_prob_cs_search <- function(g, nmax,
   return(out)
 }
 
-#' Calculate the constant boundary value given a boundary crossing probability for confidence sequences.
+#' Constant boundary value given a boundary crossing probability for confidence sequences.
 #'
-#' Constant threshold with finite target time interval.
+#' \code{const_boundary_cs} is used to compute the constant threshold for the GLR-like confidence sequences with finite target time interval.
 #'
 #' @param alpha An upper bound on the boundary crossing probability (positive numeric in \code{[1e-16,0.5]}).
 #' @param nmax Upper bound of the target time interval.

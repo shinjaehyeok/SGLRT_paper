@@ -2,7 +2,7 @@
 % Please edit documentation in R/confidence_seq.R
 \name{cross_prob_cs_search}
 \alias{cross_prob_cs_search}
-\title{Calculate the upper bound on the boundary crossing probability for confidence sequences by using a grid-search.}
+\title{Grid-searching the upper bound on the boundary crossing probability for confidence sequences.}
 \usage{
 cross_prob_cs_search(g, nmax, nmin = 1L, m_upper = 1000L)
 }
@@ -13,15 +13,11 @@ cross_prob_cs_search(g, nmax, nmin = 1L, m_upper = 1000L)
 
 \item{nmin}{Lower bound of the target time interval. (default = 1L)}
 
-\item{m_upper}{Upper bound on the grid-search for m (default = 1e+3L).}
+\item{m_upper}{Upper bound on the grid for searching m value. (default = 1e+3L)}
 }
 \value{
 Grid-search result of the upper bound on the boundary crossing probability for confidence sequences.
 }
 \description{
-Constant threshold with finite target time interval.
-}
-\examples{
-cross_prob_cs_search(1, 1e+6)
-cross_prob_cs_search(2, 1e+8, 1e+2, m_upper = 500L)
+\code{cross_prob_cs_search} is used to grid-search the constant threshold for the GLR-like confidence sequences with finite target time interval.
 }

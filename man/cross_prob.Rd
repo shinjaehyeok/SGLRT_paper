@@ -19,7 +19,3 @@ The upper bound on the boundary crossing probability based on Theorem 1 and corr
 \description{
 Constant threshold for well-seperated case.
 }
-\examples{
-cross_prob(1, 1)
-cross_prob(2, 1, eta = 2)
-}

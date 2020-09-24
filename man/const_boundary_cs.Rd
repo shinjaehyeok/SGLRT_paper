@@ -2,7 +2,7 @@
 % Please edit documentation in R/confidence_seq.R
 \name{const_boundary_cs}
 \alias{const_boundary_cs}
-\title{Calculate the constant boundary value given a boundary crossing probability for confidence sequences.}
+\title{Constant boundary value given a boundary crossing probability for confidence sequences.}
 \usage{
 const_boundary_cs(alpha, nmax, nmin = 1L, m_upper = 1000L)
 }
@@ -19,7 +19,7 @@ const_boundary_cs(alpha, nmax, nmin = 1L, m_upper = 1000L)
 Constant threshold for GLR-like confidence sequence with level \code{alpha} based on Theorem 7.
 }
 \description{
-Constant threshold with finite target time interval.
+\code{const_boundary_cs} is used to compute the constant threshold for the GLR-like confidence sequences with finite target time interval.
 }
 \examples{
 const_boundary_cs(0.05, 1e+6)

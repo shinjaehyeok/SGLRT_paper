@@ -8,12 +8,12 @@
 #' @param k_max Maximum numbers of summations. (positive integer, default = 1e+4L)
 #'
 #' @return The upper bound on the boundary crossing probability based on Theorem 1.
-#' @export
-#' @examples
-#' g_fun <- function(n) 5 + 2 * log(1 + log(n))
-#' exp_g_fun <- function(k, eta) exp(-5 / eta) / (1 + k * log(eta))^(2/eta)
-#' cross_prob_varying(g_fun, eta = 1.1)
-#' cross_prob_varying(g_fun = NULL, exp_g_fun, eta = 2)
+# @export
+# @examples
+# g_fun <- function(n) 5 + 2 * log(1 + log(n))
+# exp_g_fun <- function(k, eta) exp(-5 / eta) / (1 + k * log(eta))^(2/eta)
+# cross_prob_varying(g_fun, eta = 1.1)
+# cross_prob_varying(g_fun = NULL, exp_g_fun, eta = 2)
 cross_prob_varying <- function(g_fun = NULL,
                                exp_g_fun = NULL,
                                eta = 1.1,
@@ -49,12 +49,12 @@ cross_prob_varying <- function(g_fun = NULL,
 #' @param eta_grid_size Grid size for the grid-search for eta (default = 0.01).
 #'
 #' @return Grid-search result of the upper bound on the boundary crossing probability based on Theorem 1 for time-varying boundary.
-#' @export
-#' @examples
-#' g_fun <- function(n) 5 + 2 * log(1 + log(n))
-#' exp_g_fun <- function(k, eta) exp(-5 / eta) / (1 + k * log(eta))^(2/eta)
-#' cross_prob_varying_search(g_fun, eta_grid_size = 0.1)
-#' cross_prob_varying_search(g_fun = NULL, exp_g_fun)
+# @export
+# @examples
+# g_fun <- function(n) 5 + 2 * log(1 + log(n))
+# exp_g_fun <- function(k, eta) exp(-5 / eta) / (1 + k * log(eta))^(2/eta)
+# cross_prob_varying_search(g_fun, eta_grid_size = 0.1)
+# cross_prob_varying_search(g_fun = NULL, exp_g_fun)
 cross_prob_varying_search <- function(g_fun = NULL,
                                       exp_g_fun = NULL,
                                       k_max = 1e+4L,

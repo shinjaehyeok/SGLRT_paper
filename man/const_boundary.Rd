@@ -19,7 +19,3 @@ Constant threshold for GLR-like statistic which makes the boundary crossing prob
 \description{
 Constant threshold for well-seperated case.
 }
-\examples{
-const_boundary(0.05, .1)
-const_boundary(0.025, 1e-3, m_upper = 100L)
-}

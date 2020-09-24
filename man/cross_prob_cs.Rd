@@ -2,7 +2,7 @@
 % Please edit documentation in R/confidence_seq.R
 \name{cross_prob_cs}
 \alias{cross_prob_cs}
-\title{Calculate the upper bound on the boundary crossing probability for confidence sequences.}
+\title{Upper bound on the boundary crossing probability for confidence sequences.}
 \usage{
 cross_prob_cs(g, nmax, nmin = 1L, eta = 1.1)
 }
@@ -16,12 +16,8 @@ cross_prob_cs(g, nmax, nmin = 1L, eta = 1.1)
 \item{eta}{Peeling size (default = 1.1).}
 }
 \value{
-The upper bound on the boundary crossing probability for confidence sequeneces and corresponding K value.
+The upper bound on the boundary crossing probability for confidence sequences and corresponding K value.
 }
 \description{
-Constant threshold with finite target time interval.
-}
-\examples{
-cross_prob_cs(1, 1e+6)
-cross_prob_cs(2, 1e+8, 1e+2, eta = 2)
+\code{cross_prop_cs} is used to compute the constant threshold for the GLR-like confidence sequences with finite target time interval.
 }
