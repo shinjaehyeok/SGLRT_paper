@@ -25,7 +25,7 @@ test_that("GLR-like function should yield a valid CS for sub Gaussian case",{
                                                                 g_list$g,
                                                                 nmax,
                                                                 nmin))
-      GLR_like_fn <- GLR_stitch_mix_CI(a, nmax, nmin)$GLR_like_fn
+      GLR_like_fn <- SGLR_CI(a, nmax, nmin)$GLR_like_fn
       bound_GLR_like <- sapply(n_vec, GLR_like_fn)
 
       expect_true(max(abs(bound_GLR_direct-bound_GLR_like)) < 1e-12)
@@ -43,7 +43,7 @@ test_that("GLR-like >= Stitching >= Discrete mixture",{
       large_ind <- which(n_vec >= n)
       nmax <- ifelse(length(large_ind) > 1, sample(n_vec[n_vec >= n], 1), n)
 
-      out <- GLR_stitch_mix_CI(a, nmax, nmin)
+      out <- SGLR_CI(a, nmax, nmin)
       v_vec <- sample(1e+6, 1e+2)
       bound_GLR_like <- sapply(v_vec, out$GLR_like_fn)
       bound_stitch <- sapply(v_vec, out$stitch_fn)
@@ -65,7 +65,7 @@ test_that("GLR-like >= Stitching >= Discrete mixture",{
       large_ind <- which(n_vec >= n)
       nmax <- ifelse(length(large_ind) > 1, sample(n_vec[n_vec >= n], 1), n)
 
-      out <- GLR_stitch_mix_CI(a, nmax, nmin)
+      out <- SGLR_CI(a, nmax, nmin)
       v_vec <- seq(1,1e+4)
       bound_GLR_like <- sapply(v_vec, out$GLR_like_fn)
       bound_stitch <- sapply(v_vec, out$stitch_fn)

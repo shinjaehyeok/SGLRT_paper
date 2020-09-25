@@ -40,3 +40,19 @@ test_that("const_boundary must yield accurate prob bound",{
     expect_true(max(abs(prob_lorden-a)) < 1e-8)
   }
 })
+
+test_that("const_boundary for test must be consistent with the one for CS",{
+  alpha <- c(0.1,0.01,0.001)
+  n_vec <- 10^seq(1,5)
+  for (a in alpha){
+    for (n in n_vec){
+      nmin <- n
+      large_ind <- which(n_vec >= n)
+      nmax <- ifelse(length(large_ind) > 1, sample(n_vec[n_vec >= n], 1), n)
+      out_test <- const_boundary(a, nmax = nmax, nmin = nmin)
+      a_new <- out_test$prob + exp(-out_test$g)
+      out_cs <- const_boundary_cs(a_new, nmax, nmin)
+      expect_true(out_test$g +1e-12 >= out_cs$g)
+    }
+  }
+})

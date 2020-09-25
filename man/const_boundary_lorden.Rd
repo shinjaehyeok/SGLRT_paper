@@ -2,7 +2,7 @@
 % Please edit documentation in R/cross_prob.R
 \name{const_boundary_lorden}
 \alias{const_boundary_lorden}
-\title{Calculate the constant boundary value given a boundary crossing probability by using Lorden's bound.}
+\title{Constant boundary value given a boundary crossing probability by using Lorden's bound.}
 \usage{
 const_boundary_lorden(alpha, d)
 }
@@ -15,7 +15,7 @@ const_boundary_lorden(alpha, d)
 Constant threshold for GLR-lik statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on the Lorden's bound.
 }
 \description{
-Constant threshold for well-seperated case.
+\code{const_boundary_lorden} is used to compute the constant threshold for the sequential GLR test with the well-separated alternative space.
 }
 \examples{
 const_boundary_lorden(0.05, .1)

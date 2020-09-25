@@ -2,14 +2,18 @@
 % Please edit documentation in R/cross_prob.R
 \name{const_boundary}
 \alias{const_boundary}
-\title{Calculate the constant boundary value given a boundary crossing probability.}
+\title{Constant boundary value given a boundary crossing probability for the sequential GLR-like test.}
 \usage{
-const_boundary(alpha, d, m_upper = 1000L)
+const_boundary(alpha, d = NULL, nmax = NULL, nmin = 1L, m_upper = 1000L)
 }
 \arguments{
 \item{alpha}{An upper bound on the boundary crossing probability (positive numeric in \code{[1e-16,0.5]}).}
 
-\item{d}{Bregman divergence between the null and alternative spaces (positive numeric).}
+\item{d}{Bregman divergence between the null and alternative spaces. Either \code{d} or \code{nmax} must be specified (default = NULL).}
+
+\item{nmax}{Upper bound on the target time interval of the test. If both \code{d} and \code{nmax} are provided, \code{nmax} will be ignored. (default = NULL)}
+
+\item{nmin}{Minimum sample size of the test (default = 1L).}
 
 \item{m_upper}{Upper bound on the grid-search for m (default = 1e+3L).}
 }
@@ -17,5 +21,10 @@ const_boundary(alpha, d, m_upper = 1000L)
 Constant threshold for GLR-like statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on Theorem 1.
 }
 \description{
-Constant threshold for well-seperated case.
+\code{const_boundary} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space.
+}
+\examples{
+const_boundary(0.05, .1)
+const_boundary(0.025, 1e-3, m_upper = 100L)
+const_boundary(0.025, nmax = 1e+4, m_upper = 100L)
 }

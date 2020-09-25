@@ -2,7 +2,7 @@
 % Please edit documentation in R/cross_prob.R
 \name{cross_prob_search2}
 \alias{cross_prob_search2}
-\title{Calculate the upper bound on the boundary crossing probability by using a grid-search}
+\title{Upper bound on the boundary crossing probability by using a grid-search}
 \usage{
 cross_prob_search2(g, d, eta_upper = g/d, eta_grid_size = 0.05)
 }

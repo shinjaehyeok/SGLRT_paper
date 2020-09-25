@@ -2,7 +2,7 @@
 % Please edit documentation in R/cross_prob.R
 \name{cross_prob_lorden}
 \alias{cross_prob_lorden}
-\title{Calculate the upper bound on the boundary crossing probability by using      Lorden's formula.}
+\title{Upper bound on the boundary crossing probability by using Lorden's formula.}
 \usage{
 cross_prob_lorden(g, d)
 }
@@ -15,5 +15,5 @@ cross_prob_lorden(g, d)
 The upper bound on the boundary crossing probability based on Lorden's formula
 }
 \description{
-Constant threshold for well-seperated case.
+\code{cross_prob_lorden} is used to compute the constant threshold for the sequential GLR test with the well-separated alternative space based on Lorden's formula.
 }

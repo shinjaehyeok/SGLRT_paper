@@ -2,14 +2,16 @@
 % Please edit documentation in R/cross_prob.R
 \name{cross_prob}
 \alias{cross_prob}
-\title{Calculate the upper bound on the boundary crossing probability.}
+\title{Upper bound on the boundary crossing probability for the sequential GLR-like test.}
 \usage{
-cross_prob(g, d, eta = 1.1)
+cross_prob(g, d, nmin = 1L, eta = 1.1)
 }
 \arguments{
 \item{g}{Constant threshold (positive numeric).}
 
 \item{d}{Bregman divergence between the null and alternative spaces (positive numeric).}
+
+\item{nmin}{Minimum sample size of the test (default = 1L).}
 
 \item{eta}{Peeling size (default = 1.1).}
 }
@@ -17,5 +19,5 @@ cross_prob(g, d, eta = 1.1)
 The upper bound on the boundary crossing probability based on Theorem 1 and corresponding K value.
 }
 \description{
-Constant threshold for well-seperated case.
+\code{cross_prob} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space.
 }

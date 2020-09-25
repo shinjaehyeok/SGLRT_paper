@@ -2,14 +2,16 @@
 % Please edit documentation in R/cross_prob.R
 \name{cross_prob_search}
 \alias{cross_prob_search}
-\title{Calculate the upper bound on the boundary crossing probability by using a grid-search}
+\title{Grid-searching the upper bound on the boundary crossing probability for the sequential GLR-like test.}
 \usage{
-cross_prob_search(g, d, m_upper = 1000L)
+cross_prob_search(g, d, nmin = 1L, m_upper = 1000L)
 }
 \arguments{
 \item{g}{Constant threshold (positive numeric).}
 
 \item{d}{Bregman divergence between the null and alternative spaces (positive numeric).}
+
+\item{nmin}{Minimum sample size of the test (default = 1L).}
 
 \item{m_upper}{Upper bound on the grid-search for m (default = 1e+3L).}
 }
@@ -17,5 +19,5 @@ cross_prob_search(g, d, m_upper = 1000L)
 Grid-search result of the upper bound on the boundary crossing probability based on Theorem 1.
 }
 \description{
-Constant threshold for well-seperated case.
+\code{cross_prob_search} is used to grid-search the constant threshold for the sequential GLR-like test with the well-separated alternative space.
 }
