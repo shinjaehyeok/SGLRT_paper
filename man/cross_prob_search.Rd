@@ -19,5 +19,5 @@ cross_prob_search(g, d, nmin = 1L, m_upper = 1000L)
 Grid-search result of the upper bound on the boundary crossing probability based on Theorem 1.
 }
 \description{
-\code{cross_prob_search} is used to grid-search the constant threshold for the sequential GLR-like test with the well-separated alternative space.
+\code{cross_prob_search} is used to grid-search the constant threshold for the sequential GLR-like test with the well-separated alternative space case.
 }

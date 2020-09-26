@@ -1,6 +1,6 @@
 #' Upper bound on the boundary crossing probability for the sequential GLR-like test.
 #'
-#' \code{cross_prob} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space.
+#' \code{cross_prob} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space case.
 #'
 #' @param g Constant threshold (positive numeric).
 #' @param d Bregman divergence between the null and alternative spaces (positive numeric).
@@ -58,7 +58,7 @@ cross_prob_lorden <- function(g, d){
 
 #' Grid-searching the upper bound on the boundary crossing probability for the sequential GLR-like test.
 #'
-#' \code{cross_prob_search} is used to grid-search the constant threshold for the sequential GLR-like test with the well-separated alternative space.
+#' \code{cross_prob_search} is used to grid-search the constant threshold for the sequential GLR-like test with the well-separated alternative space case.
 #'
 #' @param g Constant threshold (positive numeric).
 #' @param d Bregman divergence between the null and alternative spaces (positive numeric).
@@ -98,7 +98,7 @@ cross_prob_search <- function(g, d,
 
 #' Constant boundary value given a boundary crossing probability for the sequential GLR-like test.
 #'
-#' \code{const_boundary} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space.
+#' \code{const_boundary} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space case.
 #'
 #' @param alpha An upper bound on the boundary crossing probability (positive numeric in \code{[1e-16,0.5]}).
 #' @param d Bregman divergence between the null and alternative spaces. Either \code{d} or \code{nmax} must be specified (default = NULL).
@@ -168,7 +168,7 @@ const_boundary <- function(alpha,
 
 #' Constant boundary value given a boundary crossing probability by using Lorden's bound.
 #'
-#' \code{const_boundary_lorden} is used to compute the constant threshold for the sequential GLR test with the well-separated alternative space.
+#' \code{const_boundary_lorden} is used to compute the constant threshold for the sequential GLR test with the well-separated alternative space case.
 #'
 #' @param alpha An upper bound on the boundary crossing probability (positive numeric in \code{[1e-16,0.5]}).
 #' @param d Bregman divergence between the null and alternative spaces (positive numeric).

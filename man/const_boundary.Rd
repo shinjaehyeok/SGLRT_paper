@@ -21,7 +21,7 @@ const_boundary(alpha, d = NULL, nmax = NULL, nmin = 1L, m_upper = 1000L)
 Constant threshold for GLR-like statistic which makes the boundary crossing probability upper bounded by \code{alpha} based on Theorem 1.
 }
 \description{
-\code{const_boundary} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space.
+\code{const_boundary} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space case.
 }
 \examples{
 const_boundary(0.05, .1)

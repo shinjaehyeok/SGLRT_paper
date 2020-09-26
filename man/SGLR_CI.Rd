@@ -2,16 +2,20 @@
 % Please edit documentation in R/stitching_mixture_method.R
 \name{SGLR_CI}
 \alias{SGLR_CI}
-\title{GLR-like, Stitching and Discrete Mixture CS for additive sub-psi class}
+\title{GLR-like and Discrete Mixture CS for general sub-psi class}
 \usage{
 SGLR_CI(
   alpha,
   nmax,
   nmin = 1L,
   m_upper = 1000L,
-  psi_star = function(x) {     x^2/2 },
-  psi_star_inv = function(x) {     sqrt(2 * x) },
-  psi_star_derv = function(x) {     x }
+  breg = function(mu_1, mu_0) {     (mu_1 - mu_0)^2/2 },
+  breg_pos_inv = function(d, mu_0) {     mu_0 + sqrt(2 * d) },
+  breg_neg_inv = function(d, mu_0) {     mu_0 - sqrt(2 * d) },
+  breg_derv = function(z, mu_0) {     z - mu_0 },
+  CI_grid = NULL,
+  mu_lower = NULL,
+  mu_upper = NULL
 )
 }
 \arguments{
@@ -23,25 +27,33 @@ SGLR_CI(
 
 \item{m_upper}{Upper bound on the grid-search for m (default = 1e+3L).}
 
-\item{psi_star}{R function of \eqn{\psi^*} (Default: \eqn{x^2 /2} (sub-Gussian with \eqn{\sigma = 1}.))}
+\item{breg}{R function of \eqn{D(\mu_1, \mu_0)} which takes \code{mu_1} and \code{mu_0} as inputs (Default: \eqn{(mu_1 - mu_0)^2 / 2}).}
 
-\item{psi_star_inv}{R function of \eqn{\psi^{*-1}} (Default: \eqn{\sqrt{2x}}) .}
+\item{breg_pos_inv}{R function of inverse of the mapping \eqn{z \mapsto D(z, \mu_0):= d} on \eqn{z > \mu_0} which takes \code{d} and \code{mu_0} as inputs (Default: \eqn{\mu_0+\sqrt{2d}}).}
 
-\item{psi_star_derv}{R function of \eqn{\nabla\psi^*} (Default: \eqn{x}).}
+\item{breg_neg_inv}{R function of inverse of the mapping \eqn{z \mapsto D(z, \mu_0):= d} on \eqn{z < \mu_0} which takes \code{d} and \code{mu_0} as inputs (Default: \eqn{\mu_0 - \sqrt{2d}}).}
+
+\item{breg_derv}{R function of \eqn{\nabla_z D(z, \mu_0)} which takes \code{z} and \code{mu_0} as inputs  (Default: \eqn{z - \mu_0}).}
+
+\item{CI_grid}{Grid of mean space. The grid must contain both minimum and maximum of possible mean parameters. Default is \code{NULL}. If \code{CI_grid} is not null, CI is computed based on the grid-search.}
+
+\item{mu_lower}{Lower bound of the mean parameter space (default = NULL).}
+
+\item{mu_upper}{Upper bound of the mean parameter space (default = NULL).}
 }
 \value{
-A list of R functions for stitching and discrete mixture bound which takes the sample size \code{n} as the input and return the distance from the sample mean to the upper bound of confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
+A list of R functions for GLR-like, stitching and discrete mixture bound which takes sample mean \code{x_bar} and sample size \code{n} as the input and return the anytime-valid confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
 \describe{
 \item{GLR_like_fn}{R function for the GLR-like bound.}
-\item{stitch_fn}{R function for the stitching bound.}
 \item{dis_mix_fn}{R function for the discrete mixture bound.}
-\item{g}{The constant bouandry value.}
+\item{log_GLR_like_stat_generator}{R function to generate log of GLR-like statistic minus the threshold.}
+\item{log_dis_mart_generator}{R function to generate log of GLR-like statistic minus the threshold.}
 \item{eta}{The eta value used to construct underlying martingales}
 \item{K}{The number of LR-like martingales used to construct bounds for \eqn{n \geq n_{\min}} part.}
 }
 }
 \description{
-\code{SGLR_CI} is used to compute R functions which compute bounds of GLR-like, stitching and discrete mixture confidence sequences desgined to a finite target time interval.
+\code{SGLR_CI} is used to compute R functions which compute bounds of GLR-like, stitching and discrete mixture confidence sequences for general sub-psi class designed to a finite target time interval. For the additive sub-psi class, we recommend to use \code{SGLR_CI_additive} for more efficient computations.
 }
 \examples{
 SGLR_CI(0.025, 1e+5)

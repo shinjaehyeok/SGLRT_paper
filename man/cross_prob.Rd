@@ -19,5 +19,5 @@ cross_prob(g, d, nmin = 1L, eta = 1.1)
 The upper bound on the boundary crossing probability based on Theorem 1 and corresponding K value.
 }
 \description{
-\code{cross_prob} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space.
+\code{cross_prob} is used to compute the constant threshold for the sequential GLR-like test with the well-separated alternative space case.
 }

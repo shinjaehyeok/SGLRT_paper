@@ -1,18 +1,148 @@
 #' GLR-like, Stitching and Discrete Mixture CS for additive sub-psi class
 #'
-#' \code{SGLR_CI} is used to compute R functions which compute bounds of GLR-like, stitching and discrete mixture confidence sequences desgined to a finite target time interval.
+#' \code{SGLR_CI_additive} is used to compute R functions which compute bounds of GLR-like, stitching and discrete mixture confidence sequences for additive sub-psi class designed to a finite target time interval.
 #'
 #' @inheritParams const_boundary_cs
-#' @param psi_star R function of \eqn{\psi^*} (Default: \eqn{x^2 /2} (sub-Gussian with \eqn{\sigma = 1}.))
-#' @param psi_star_inv R function of \eqn{\psi^{*-1}} (Default: \eqn{\sqrt{2x}}) .
+#' @param psi_star_inv R function of \eqn{\psi_{+}^{*-1}} (Default: \eqn{\sqrt{2x}}) .
 #' @param psi_star_derv R function of \eqn{\nabla\psi^*} (Default: \eqn{x}).
 #'
-#' @return A list of R functions for stitching and discrete mixture bound which takes the sample size \code{n} as the input and return the distance from the sample mean to the upper bound of confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
+#' @return A list of R functions for GLR-like, stitching and discrete mixture bound which takes the sample size \code{n} as the input and return the distance from the sample mean to the upper bound of confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
 #' \describe{
 #'   \item{GLR_like_fn}{R function for the GLR-like bound.}
 #'   \item{stitch_fn}{R function for the stitching bound.}
 #'   \item{dis_mix_fn}{R function for the discrete mixture bound.}
+#'   \item{log_mtg_fn}{R function for the log of the underlying log super-martingale.}
 #'   \item{g}{The constant bouandry value.}
+#'   \item{eta}{The eta value used to construct underlying martingales}
+#'   \item{K}{The number of LR-like martingales used to construct bounds for \eqn{n \geq n_{\min}} part.}
+#' }
+#'
+#' @export
+#' @examples
+#' SGLR_CI_additive(0.025, 1e+5)
+#' SGLR_CI_additive(0.025, 1e+6, 1e+2)
+
+SGLR_CI_additive <- function(alpha,
+                             nmax,
+                             nmin = 1L,
+                             m_upper = 1e+3L,
+                             psi_star_inv = function(x){sqrt(2 * x)},
+                             psi_star_derv = function(x){x})
+{
+  # Calculate g, eta, K
+  param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+  g <- param_out$g
+  eta <- param_out$eta
+  K <- param_out$K
+
+  # Compute GLR-like bounds
+  psi_inv_val1 <- psi_star_inv(g / nmin)
+  slop1 <- g / psi_star_derv(psi_inv_val1)
+  const1 <- psi_inv_val1 - slop1 / nmin
+
+  psi_inv_val2 <- psi_star_inv(g / nmax)
+  slop2 <- g / psi_star_derv(psi_inv_val2)
+  const2 <- psi_inv_val2 - slop2 / nmax
+
+
+  GLR_like_fn <- function(v){
+    if (v < nmin){
+      out <- const1 + slop1 / v
+    } else if (v > nmax){
+      out <- const2 + slop2 / v
+    } else {
+      out <- psi_star_inv(g / v)
+    }
+    return(out)
+  }
+
+
+  # Compute stitching and discrete mixture bounds
+  # Calculate a_vec (slop), b_vec (const)
+  if (nmin == 1) {
+    g_eta_vec <-  g / eta^seq(1,K)
+  } else {
+    g_eta_vec <-  g / eta^seq(0,K) / nmin
+  }
+  inv_g_eta_vec <- sapply(g_eta_vec, psi_star_inv)
+  a_vec <- sapply(inv_g_eta_vec, psi_star_derv)
+  b_vec <- g_eta_vec - a_vec * inv_g_eta_vec
+
+  # Calculate coeff (CI := (\bar{X} - \min_k (1/n s_k - c_k), \infty)
+  if (nmin == 1){
+    s_vec <- g / eta / a_vec
+  } else {
+    s_vec <- c(g / a_vec[1], g / eta / a_vec[-1])
+  }
+  c_vec <- b_vec / a_vec
+
+  # Boundary function for stitching
+  stitch_fn <- function(v){
+    min(s_vec / v - c_vec)
+  }
+
+  # Discrete mixture
+  if (nmin == 1){
+    dis_mart <- function(x_bar, v){
+      inner <- v * (b_vec + a_vec * x_bar)
+      inner_max <- max(inner)
+      out <- inner_max + log(sum(exp(inner - inner_max))) - g / eta
+      return(out)
+    }
+  } else if (nmin == nmax){
+    dis_mart <- function(x_bar, v){
+      v * (b_vec[1] + a_vec[1] * x_bar) - g
+    }
+  } else {
+    dis_mart <- function(x_bar, v){
+      inner <- v * (b_vec + a_vec * x_bar)
+      inner[1] <- inner[1] - g
+      inner[-1] <- inner[-1] - g / eta
+      inner_max <- max(inner)
+      out <- inner_max + log(sum(exp(inner - inner_max)))
+    }
+  }
+
+  # Boundary function for discrete mixture
+  dis_mix_fn <- function(v){
+    f <- function(x) dis_mart(x, v = v)
+    upper <- stitch_fn(v)
+    bound <- stats::uniroot(f, c(upper / 2, upper * 1.001), tol = 1e-12)$root
+    return(bound)
+  }
+
+  out <- list(GLR_like_fn = GLR_like_fn,
+              stitch_fn = stitch_fn,
+              dis_mix_fn = dis_mix_fn,
+              log_mtg_fn = dis_mart,
+              alpha = alpha,
+              nmax = nmax,
+              nmin = nmin,
+              g = g,
+              eta = eta,
+              K = K)
+  return(out)
+}
+
+
+#' GLR-like and Discrete Mixture CS for general sub-psi class
+#'
+#' \code{SGLR_CI} is used to compute R functions which compute bounds of GLR-like, stitching and discrete mixture confidence sequences for general sub-psi class designed to a finite target time interval. For the additive sub-psi class, we recommend to use \code{SGLR_CI_additive} for more efficient computations.
+#'
+#' @inheritParams const_boundary_cs
+#' @param breg R function of \eqn{D(\mu_1, \mu_0)} which takes \code{mu_1} and \code{mu_0} as inputs (Default: \eqn{(mu_1 - mu_0)^2 / 2}).
+#' @param breg_pos_inv R function of inverse of the mapping \eqn{z \mapsto D(z, \mu_0):= d} on \eqn{z > \mu_0} which takes \code{d} and \code{mu_0} as inputs (Default: \eqn{\mu_0+\sqrt{2d}}).
+#' @param breg_neg_inv R function of inverse of the mapping \eqn{z \mapsto D(z, \mu_0):= d} on \eqn{z < \mu_0} which takes \code{d} and \code{mu_0} as inputs (Default: \eqn{\mu_0 - \sqrt{2d}}).
+#' @param breg_derv R function of \eqn{\nabla_z D(z, \mu_0)} which takes \code{z} and \code{mu_0} as inputs  (Default: \eqn{z - \mu_0}).
+#' @param CI_grid Grid of mean space. The grid must contain both minimum and maximum of possible mean parameters. Default is \code{NULL}. If \code{CI_grid} is not null, CI is computed based on the grid-search.
+#' @param mu_lower Lower bound of the mean parameter space (default = NULL).
+#' @param mu_upper Upper bound of the mean parameter space (default = NULL).
+#' @return A list of R functions for GLR-like, stitching and discrete mixture bound which takes sample mean \code{x_bar} and sample size \code{n} as the input and return the anytime-valid confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
+#' \describe{
+#'   \item{GLR_like_fn}{R function for the GLR-like bound.}
+#'   \item{dis_mix_fn}{R function for the discrete mixture bound.}
+#'   \item{log_GLR_like_stat_generator}{R function to generate log of GLR-like statistic minus the threshold.}
+#'   \item{log_dis_mart_generator}{R function to generate log of GLR-like statistic minus the threshold.}
 #'   \item{eta}{The eta value used to construct underlying martingales}
 #'   \item{K}{The number of LR-like martingales used to construct bounds for \eqn{n \geq n_{\min}} part.}
 #' }
@@ -23,138 +153,16 @@
 #' SGLR_CI(0.025, 1e+6, 1e+2)
 
 SGLR_CI <- function(alpha,
-                          nmax,
-                          nmin = 1L,
-                          m_upper = 1e+3L,
-                          psi_star = function(x){x^2 / 2},
-                          psi_star_inv = function(x){sqrt(2 * x)},
-                          psi_star_derv = function(x){x})
-{
-  # Calculate g, eta, K
-  param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
-  g <- param_out$g
-  eta <- param_out$eta
-  K <- param_out$K
-
-  # Compute GLR-like bounds
-  psi_inv_val1 <- psi_star_inv(g / nmin)
-  slop1 <- g / psi_star_derv(psi_inv_val1)
-  const1 <- psi_inv_val1 - slop1 / nmin
-
-  psi_inv_val2 <- psi_star_inv(g / nmax)
-  slop2 <- g / psi_star_derv(psi_inv_val2)
-  const2 <- psi_inv_val2 - slop2 / nmax
-
-
-  GLR_like_fn <- function(v){
-    if (v < nmin){
-      out <- const1 + slop1 / v
-    } else if (v > nmax){
-      out <- const2 + slop2 / v
-    } else {
-      out <- psi_star_inv(g / v)
-    }
-    return(out)
-  }
-
-
-  # Compute stitching and discrete mixture bounds
-  # Calculate a_vec (slop), b_vec (const)
-  if (nmin == 1) {
-    g_eta_vec <-  g / eta^seq(1,K)
-  } else {
-    g_eta_vec <-  g / eta^seq(0,K) / nmin
-  }
-  inv_g_eta_vec <- sapply(g_eta_vec, psi_star_inv)
-  a_vec <- sapply(inv_g_eta_vec, psi_star_derv)
-  b_vec <- g_eta_vec - a_vec * inv_g_eta_vec
-
-  # Calculate coeff (CI := (\bar{X} - \min_k (1/n s_k - c_k), \infty)
-  if (nmin == 1){
-    s_vec <- g / eta / a_vec
-  } else {
-    s_vec <- c(g / a_vec[1], g / eta / a_vec[-1])
-  }
-  c_vec <- b_vec / a_vec
-
-  # Boundary function for stitching
-  stitch_fn <- function(v){
-    min(s_vec / v - c_vec)
-  }
-
-  # Discrete mixture
-  if (nmin == 1){
-    dis_mart <- function(x_bar, v){
-      inner <- v * (b_vec + a_vec * x_bar)
-      inner_max <- max(inner)
-      out <- inner_max + log(sum(exp(inner - inner_max))) - g / eta
-      return(out)
-    }
-  } else if (nmin == nmax){
-    dis_mart <- function(x_bar, v){
-      v * (b_vec[1] + a_vec[1] * x_bar) - g
-    }
-  } else {
-    dis_mart <- function(x_bar, v){
-      inner <- v * (b_vec + a_vec * x_bar)
-      inner[1] <- inner[1] - g
-      inner[-1] <- inner[-1] - g / eta
-      inner_max <- max(inner)
-      out <- inner_max + log(sum(exp(inner - inner_max)))
-    }
-  }
-
-  # Boundary function for discrete mixture
-  dis_mix_fn <- function(v){
-    f <- function(x) dis_mart(x, v = v)
-    upper <- stitch_fn(v)
-    bound <- stats::uniroot(f, c(upper / 2, upper * 1.001), tol = 1e-12)$root
-    return(bound)
-  }
-
-  out <- list(GLR_like_fn = GLR_like_fn,
-              stitch_fn = stitch_fn,
-              dis_mix_fn = dis_mix_fn,
-              alpha = alpha,
-              nmax = nmax,
-              nmin = nmin,
-              g = g,
-              eta = eta,
-              K = K)
-  return(out)
-}
-
-#' GLR-like, Stitching and Discrete Mixture Test for sub-psi class
-#'
-#' \code{SGLR_test} is used to compute R functions which compute bounds of GLR-like, stitching and discrete mixture confidence sequences desgined to a finite target time interval.
-#'
-#' @inheritParams const_boundary_cs
-#' @param psi_star R function of \eqn{\psi^*} (Default: \eqn{x^2 /2} (sub-Gussian with \eqn{\sigma = 1}.))
-#' @param psi_star_inv R function of \eqn{\psi^{*-1}} (Default: \eqn{\sqrt{2x}}) .
-#' @param psi_star_derv R function of \eqn{\nabla\psi^*} (Default: \eqn{x}).
-#'
-#' @return A list of R functions for stitching and discrete mixture bound which takes the sample size \code{n} as the input and return the distance from the sample mean to the upper bound of confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
-#' \describe{
-#'   \item{GLR_like_fn}{R function for the GLR-like bound.}
-#'   \item{stitch_fn}{R function for the stitching bound.}
-#'   \item{dis_mix_fn}{R function for the discrete mixture bound.}
-#'   \item{g}{The constant bouandry value.}
-#'   \item{eta}{The eta value used to construct underlying martingales}
-#'   \item{K}{The number of LR-like martingales used to construct bounds for \eqn{n \geq n_{\min}} part.}
-#' }
-#'
-#' @export
-#' @examples
-#' SGLR_test(0.025, 1e+5)
-#' SGLR_test(0.025, 1e+6, 1e+2)
-
-SGLR_test <- function(alpha,
                     nmax,
                     nmin = 1L,
                     m_upper = 1e+3L,
-                    psi_star = function(x){x^2 / 2},
-                    psi_star_inv = function(x){sqrt(2 * x)},
-                    psi_star_derv = function(x){x})
+                    breg = function(mu_1, mu_0){(mu_1 - mu_0)^2 / 2},
+                    breg_pos_inv = function(d, mu_0){mu_0 + sqrt(2 * d)},
+                    breg_neg_inv = function(d, mu_0){mu_0 - sqrt(2 * d)},
+                    breg_derv = function(z, mu_0){z - mu_0},
+                    CI_grid = NULL,
+                    mu_lower = NULL,
+                    mu_upper = NULL)
 {
   # Calculate g, eta, K
   param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
@@ -162,91 +170,358 @@ SGLR_test <- function(alpha,
   eta <- param_out$eta
   K <- param_out$K
 
-  # Compute GLR-like bounds
-  psi_inv_val1 <- psi_star_inv(g / nmin)
-  slop1 <- g / psi_star_derv(psi_inv_val1)
-  const1 <- psi_inv_val1 - slop1 / nmin
 
-  psi_inv_val2 <- psi_star_inv(g / nmax)
-  slop2 <- g / psi_star_derv(psi_inv_val2)
-  const2 <- psi_inv_val2 - slop2 / nmax
-
-
-  GLR_like_fn <- function(v){
-    if (v < nmin){
-      out <- const1 + slop1 / v
-    } else if (v > nmax){
-      out <- const2 + slop2 / v
-    } else {
-      out <- psi_star_inv(g / v)
+  # Compute GLR-like statistics
+  GLR_like_stat_generator <- function(mu_0, is_pos = TRUE){
+    if (!is.null(mu_upper)){
+      if (mu_0 == mu_upper){
+        GLR_like_stat_fn <- function(x_bar, v){
+          out <- ifelse(x_bar == mu_0, -Inf, Inf)
+          return(out)
+        }
+        return(GLR_like_stat_fn)
+      }
     }
-    return(out)
+    if (!is.null(mu_lower)){
+      if (mu_0 == mu_lower){
+        GLR_like_stat_fn <- function(x_bar, v){
+          out <- ifelse(x_bar == mu_0, -Inf, Inf)
+          return(out)
+        }
+        return(GLR_like_stat_fn)
+      }
+    }
+
+
+    if (is_pos){
+      z_fn <- function(d) breg_pos_inv(d, mu_0)
+      if (!is.null(mu_upper)){
+        eff_nmin <- g / breg(mu_upper, mu_0)
+        if (nmin < eff_nmin){
+          nmin <- eff_nmin
+          nmax <- ifelse(nmax > nmin, nmax, nmin)
+          param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+          g <- param_out$g
+          eta <- param_out$eta
+          K <- param_out$K
+        }
+      }
+    } else {
+      z_fn <- function(d) breg_neg_inv(d, mu_0)
+      if (!is.null(mu_lower)){
+        eff_nmin <- g / breg(mu_lower, mu_0)
+        if (nmin < eff_nmin){
+          nmin <- eff_nmin
+          nmax <- ifelse(nmax > nmin, nmax, nmin)
+          param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+          g <- param_out$g
+          eta <- param_out$eta
+          K <- param_out$K
+        }
+      }
+    }
+
+    d2 <- g / nmin
+    d1 <- g / nmax
+
+    mu_2 <- z_fn(d2)
+    slop_2 <- breg_derv(mu_2, mu_0)
+    mu_1 <- z_fn(d1)
+    slop_1 <- breg_derv(mu_1, mu_0)
+
+    GLR_like_stat_fn <- function(x_bar, v){
+      if (v < nmin){
+        out <- d2 + slop_2 * (x_bar - mu_2)
+      } else if (v > nmax){
+        mu_1 <- z_fn(d1)
+        out <- d1 + slop_1 * (x_bar - mu_1)
+      } else {
+        if (is_pos & x_bar >= mu_0){
+          out <- breg(x_bar, mu_0)
+        } else if (!is_pos & x_bar <= mu_0){
+          out <- breg(x_bar, mu_0)
+        } else{
+          out <- 0
+        }
+      }
+      return(max(out,0) * v -g)
+    }
+    return(GLR_like_stat_fn)
   }
 
 
-  # Compute stitching and discrete mixture bounds
-  # Calculate a_vec (slop), b_vec (const)
-  if (nmin == 1) {
+
+  # Compute discrete mixture statistics
+  if (nmin == 1){
     g_eta_vec <-  g / eta^seq(1,K)
-  } else {
-    g_eta_vec <-  g / eta^seq(0,K) / nmin
-  }
-  inv_g_eta_vec <- sapply(g_eta_vec, psi_star_inv)
-  a_vec <- sapply(inv_g_eta_vec, psi_star_derv)
-  b_vec <- g_eta_vec - a_vec * inv_g_eta_vec
+    dis_mart_generator <- function(mu_0, is_pos = TRUE){
+      if (!is.null(mu_upper)){
+        if (mu_0 == mu_upper){
+          dis_mart <- function(x_bar, v){
+            out <- ifelse(x_bar == mu_0, -Inf, Inf)
+            return(out)
+          }
+          return(dis_mart)
+        }
+      }
+      if (!is.null(mu_lower)){
+        if (mu_0 == mu_lower){
+          dis_mart <- function(x_bar, v){
+            out <- ifelse(x_bar == mu_0, -Inf, Inf)
+            return(out)
+          }
+          return(dis_mart)
+        }
+      }
+      if (is_pos){
+        z_fn <- function(d) breg_pos_inv(d, mu_0)
+        if (!is.null(mu_upper)){
+          eff_nmin <- g / breg(mu_upper, mu_0)
+          if (nmin < eff_nmin){
+            nmin <- eff_nmin
+            nmax <- ifelse(nmax > nmin, nmax, nmin)
 
-  # Calculate coeff (CI := (\bar{X} - \min_k (1/n s_k - c_k), \infty)
-  if (nmin == 1){
-    s_vec <- g / eta / a_vec
-  } else {
-    s_vec <- c(g / a_vec[1], g / eta / a_vec[-1])
-  }
-  c_vec <- b_vec / a_vec
+            param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+            g <- param_out$g
+            eta <- param_out$eta
+            K <- param_out$K
+            g_eta_vec <-  g / eta^seq(1,K)
+          }
+        }
+      } else {
+        z_fn <- function(d) breg_neg_inv(d, mu_0)
+        if (!is.null(mu_lower)){
+          eff_nmin <- g / breg(mu_lower, mu_0)
+          if (nmin < eff_nmin){
+            nmin <- eff_nmin
+            nmax <- ifelse(nmax > nmin, nmax, nmin)
 
-  # Boundary function for stitching
-  stitch_fn <- function(v){
-    min(s_vec / v - c_vec)
-  }
+            param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+            g <- param_out$g
+            eta <- param_out$eta
+            K <- param_out$K
+            g_eta_vec <-  g / eta^seq(1,K)
+          }
+        }
+      }
+      z_vec <- sapply(g_eta_vec, z_fn)
+      slop_vec <- sapply(z_vec, function(z) breg_derv(z, mu_0))
 
-  # Discrete mixture
-  if (nmin == 1){
-    dis_mart <- function(x_bar, v){
-      inner <- v * (b_vec + a_vec * x_bar)
-      inner_max <- max(inner)
-      out <- inner_max + log(sum(exp(inner - inner_max))) - g / eta
-      return(out)
+      dis_mart <- function(x_bar, v){
+        inner <- v * ( g_eta_vec + slop_vec * (x_bar - z_vec) )
+        inner_max <- max(inner)
+        out <- inner_max + log(sum(exp(inner - inner_max))) - g / eta
+        return(out)
+      }
+      return(dis_mart)
     }
   } else if (nmin == nmax){
-    dis_mart <- function(x_bar, v){
-      v * (b_vec[1] + a_vec[1] * x_bar) - g
+    dis_mart_generator <- function(mu_0, is_pos = TRUE){
+      if (!is.null(mu_upper)){
+        if (mu_0 == mu_upper){
+          dis_mart <- function(x_bar, v){
+            out <- ifelse(x_bar == mu_0, -Inf, Inf)
+            return(out)
+          }
+          return(dis_mart)
+        }
+      }
+      if (!is.null(mu_lower)){
+        if (mu_0 == mu_lower){
+          dis_mart <- function(x_bar, v){
+            out <- ifelse(x_bar == mu_0, -Inf, Inf)
+            return(out)
+          }
+          return(dis_mart)
+        }
+      }
+      if (is_pos){
+        z_fn <- function(d) breg_pos_inv(d, mu_0)
+        if (!is.null(mu_upper)){
+          eff_nmin <- g / breg(mu_upper, mu_0)
+          if (nmin < eff_nmin){
+            nmin <- eff_nmin
+            nmax <- ifelse(nmax > nmin, nmax, nmin)
+
+            param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+            g <- param_out$g
+            d1 <- g / nmin
+          }
+        }
+      } else {
+        z_fn <- function(d) breg_neg_inv(d, mu_0)
+        if (!is.null(mu_lower)){
+          eff_nmin <- g / breg(mu_lower, mu_0)
+          if (nmin < eff_nmin){
+            nmin <- eff_nmin
+            nmax <- ifelse(nmax > nmin, nmax, nmin)
+
+            param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+            g <- param_out$g
+          }
+        }
+      }
+      d2 <- g / nmin
+      z_val <- z_fn(d2)
+      slop_val <- breg_derv(z_val, mu_0)
+
+      dis_mart <- function(x_bar, v){
+        v * ( d2 + slop_val * (x_bar - z_val) ) - g
+      }
+      return(dis_mart)
     }
   } else {
-    dis_mart <- function(x_bar, v){
-      inner <- v * (b_vec + a_vec * x_bar)
-      inner[1] <- inner[1] - g
-      inner[-1] <- inner[-1] - g / eta
-      inner_max <- max(inner)
-      out <- inner_max + log(sum(exp(inner - inner_max)))
+    g_eta_vec <-  g / eta^seq(0,K) / nmin
+    dis_mart_generator <- function(mu_0, is_pos = TRUE){
+      if (!is.null(mu_upper)){
+        if (mu_0 == mu_upper){
+          dis_mart <- function(x_bar, v){
+            out <- ifelse(x_bar == mu_0, -Inf, Inf)
+            return(out)
+          }
+          return(dis_mart)
+        }
+      }
+      if (!is.null(mu_lower)){
+        if (mu_0 == mu_lower){
+          dis_mart <- function(x_bar, v){
+            out <- ifelse(x_bar == mu_0, -Inf, Inf)
+            return(out)
+          }
+          return(dis_mart)
+        }
+      }
+      if (is_pos){
+        z_fn <- function(d) breg_pos_inv(d, mu_0)
+        if (!is.null(mu_upper)){
+          eff_nmin <- g / breg(mu_upper, mu_0)
+          if (nmin < eff_nmin){
+            nmin <- eff_nmin
+            nmax <- ifelse(nmax > nmin, nmax, nmin)
+
+            param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+            g <- param_out$g
+            eta <- param_out$eta
+            K <- param_out$K
+            g_eta_vec <-  g / eta^seq(0,K) / nmin
+          }
+        }
+      } else {
+        z_fn <- function(d) breg_neg_inv(d, mu_0)
+        if (!is.null(mu_lower)){
+          eff_nmin <- g / breg(mu_lower, mu_0)
+          if (nmin < eff_nmin){
+            nmin <- eff_nmin
+            nmax <- ifelse(nmax > nmin, nmax, nmin)
+
+            param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+            g <- param_out$g
+            eta <- param_out$eta
+            K <- param_out$K
+            g_eta_vec <-  g / eta^seq(0,K) / nmin
+          }
+        }
+      }
+      z_vec <- sapply(g_eta_vec, z_fn)
+      slop_vec <- sapply(z_vec, function(z) breg_derv(z, mu_0))
+
+      dis_mart <- function(x_bar, v){
+        inner <- v * ( g_eta_vec + slop_vec * (x_bar - z_vec) )
+        inner[1] <- inner[1] - g
+        inner[-1] <- inner[-1] - g / eta
+        inner_max <- max(inner)
+        out <- inner_max + log(sum(exp(inner - inner_max)))
+        return(out)
+      }
+      return(dis_mart)
     }
   }
 
-  # Boundary function for discrete mixture
-  dis_mix_fn <- function(v){
-    f <- function(x) dis_mart(x, v = v)
-    upper <- stitch_fn(v)
-    bound <- stats::uniroot(f, c(upper / 2, upper * 1.001), tol = 1e-12)$root
-    return(bound)
-  }
+  # Compute CI bound
 
-  out <- list(GLR_like_fn = GLR_like_fn,
-              stitch_fn = stitch_fn,
-              dis_mix_fn = dis_mix_fn,
-              alpha = alpha,
-              nmax = nmax,
-              nmin = nmin,
-              g = g,
-              eta = eta,
-              K = K)
-  return(out)
+  find_CI_fn <- function(stat_fn, x_bar, v, is_pos = TRUE){
+    f_mu <- function(mu) stat_fn(x_bar, v, mu, is_pos)
+    if (is.null(CI_grid)){
+      thres <- log(1 / alpha) / v
+      if (v < nmin){
+        m_factor <- max(100, 100 * log(nmin / v, base = 10))
+      } else if (v > nmax){
+        m_factor <- max(100, 100 * log(v / nmax, base = 10))
+      } else{
+        m_factor <- 5
+      }
+
+      if (is_pos){
+        if (is.null(mu_lower)){
+          # Use breg_inv functions for approximate searching range
+          z_bound_with_sign <- breg_neg_inv(thres, x_bar) - x_bar
+          search_range <- c(x_bar + m_factor * z_bound_with_sign,
+                            x_bar + z_bound_with_sign / 3)
+        } else {
+          search_range <- c(mu_lower, x_bar)
+          if (f_mu(search_range[1]) <= 0) return(mu_lower)
+        }
+      } else {
+        if (is.null(mu_upper)){
+          z_bound_with_sign <- breg_pos_inv(thres, x_bar) - x_bar
+          search_range <- c(x_bar + z_bound_with_sign / 3,
+                            x_bar + m_factor * z_bound_with_sign)
+        } else{
+          search_range <- c(x_bar, mu_upper)
+          if (f_mu(search_range[2]) <= 0) return(mu_upper)
+        }
+      }
+
+      bound <- stats::uniroot(f_mu,
+                              search_range,
+                              tol = 1e-12)$root
+    } else {
+      grid_n <- length(CI_grid)
+      if (is_pos){
+        grid_inter <- CI_grid[CI_grid <= x_bar]
+        stat_vec <- sapply(grid_inter, f_mu)
+        ind <- which(stat_vec < 0)
+        bound <- grid_inter[max(min(ind) - 1,1)]
+      } else {
+        grid_inter <- CI_grid[CI_grid >= x_bar]
+        stat_vec <- sapply(grid_inter, f_mu)
+        ind <- which(stat_vec < 0)
+        bound <- grid_inter[min(max(ind) + 1, length(grid_inter))]
+      }
+    }
+  return(bound)
 }
 
+# Compute GLR-like CI bound
+
+GLR_like_fn <- function(x_bar, v, is_pos = TRUE){
+  GLR_like_inner <- function(x_bar, v, mu_0, is_pos){
+    f <- GLR_like_stat_generator(mu_0, is_pos)
+    return(f(x_bar, v))
+  }
+  find_CI_fn(GLR_like_inner , x_bar, v, is_pos)
+}
+
+# Compute dis. mixture CI bound
+dis_mix_fn <- function(x_bar, v, is_pos = TRUE){
+  dis_mix_inner <- function(x_bar, v, mu_0, is_pos){
+    f <- dis_mart_generator(mu_0, is_pos)
+    return(f(x_bar, v))
+  }
+  find_CI_fn(dis_mix_inner, x_bar, v, is_pos)
+}
+
+out <- list(GLR_like_fn = GLR_like_fn,
+            dis_mix_fn = dis_mix_fn,
+            log_GLR_like_stat_generator = GLR_like_stat_generator,
+            log_dis_mart_generator = dis_mart_generator,
+            alpha = alpha,
+            nmax = nmax,
+            nmin = nmin,
+            g = g,
+            eta = eta,
+            K = K,
+            CI_grid = CI_grid,
+            mu_range = c(mu_lower, mu_upper))
+return(out)
+}
