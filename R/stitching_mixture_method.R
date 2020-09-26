@@ -134,9 +134,10 @@ SGLR_CI_additive <- function(alpha,
 #' @param breg_pos_inv R function of inverse of the mapping \eqn{z \mapsto D(z, \mu_0):= d} on \eqn{z > \mu_0} which takes \code{d} and \code{mu_0} as inputs (Default: \eqn{\mu_0+\sqrt{2d}}).
 #' @param breg_neg_inv R function of inverse of the mapping \eqn{z \mapsto D(z, \mu_0):= d} on \eqn{z < \mu_0} which takes \code{d} and \code{mu_0} as inputs (Default: \eqn{\mu_0 - \sqrt{2d}}).
 #' @param breg_derv R function of \eqn{\nabla_z D(z, \mu_0)} which takes \code{z} and \code{mu_0} as inputs  (Default: \eqn{z - \mu_0}).
-#' @param CI_grid Grid of mean space. The grid must contain both minimum and maximum of possible mean parameters. Default is \code{NULL}. If \code{CI_grid} is not null, CI is computed based on the grid-search.
 #' @param mu_lower Lower bound of the mean parameter space (default = NULL).
 #' @param mu_upper Upper bound of the mean parameter space (default = NULL).
+#' @param grid_by The size of grid-window of mean space. Default is \code{NULL}.
+#'
 #' @return A list of R functions for GLR-like, stitching and discrete mixture bound which takes sample mean \code{x_bar} and sample size \code{n} as the input and return the anytime-valid confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
 #' \describe{
 #'   \item{GLR_like_fn}{R function for the GLR-like bound.}
@@ -147,8 +148,8 @@ SGLR_CI_additive <- function(alpha,
 #'   \item{g}{The boundary value for initial \code{nmin} and \code{nmax}.}
 #'   \item{eta}{The eta value used to construct underlying martingales}
 #'   \item{K}{The number of LR-like martingales used to construct bounds for \eqn{n \geq n_{\min}} part.}
-#'   \item{CI_grid}{The numeric vector for used to compute bounds.}
 #'   \item{mu_range}{Minimum and maximum of the mean parater space.}
+#'   \item{grid_by}{The size of grid-window of mean space.}
 #' }
 #'
 #' @export
@@ -164,16 +165,25 @@ SGLR_CI <- function(alpha,
                     breg_pos_inv = function(d, mu_0){mu_0 + sqrt(2 * d)},
                     breg_neg_inv = function(d, mu_0){mu_0 - sqrt(2 * d)},
                     breg_derv = function(z, mu_0){z - mu_0},
-                    CI_grid = NULL,
                     mu_lower = NULL,
-                    mu_upper = NULL)
+                    mu_upper = NULL,
+                    grid_by = NULL)
 {
   # Calculate g, eta, K for common parameters for both generators
   param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
   g <- param_out$g
   eta <- param_out$eta
   K <- param_out$K
+  CI_grid <- NULL
 
+  # Construct grid if grid size and mean range are provided.
+  if (!is.null(grid_by)){
+    if (is.null(mu_lower) | is.null(mu_upper)){
+      warning("The range of mean space (mu_lower, mu_upper) cannot found. grid_by will be ignored.")
+    } else {
+      CI_grid <- seq(mu_lower, mu_upper, by = grid_by)
+    }
+  }
   # Initializing function for statistic generators
   initial_fn <- function(mu_0, is_pos){
     # Define  the trivial Statistic for bounded mean parameter case
@@ -273,9 +283,11 @@ SGLR_CI <- function(alpha,
     GLR_like_stat_fn <- function(x_bar, v){
       if (v < nmin){
         out <- d2 + slop_2 * (x_bar - mu_2)
+        out <- ifelse(is.nan(out), -Inf, out)
       } else if (v > nmax){
         mu_1 <- z_fn(d1)
         out <- d1 + slop_1 * (x_bar - mu_1)
+        out <- ifelse(is.nan(out), -Inf, out)
       } else {
         if (is_pos & x_bar >= mu_0){
           out <- breg(x_bar, mu_0)
@@ -329,8 +341,13 @@ SGLR_CI <- function(alpha,
       slop_val <- breg_derv(z_val, mu_0)
 
       dis_mart <- function(x_bar, v){
-        v * ( d1 + slop_val * (x_bar - z_val) ) - g
+        # inside_term <- ifelse(abs(x_bar - z_val) < 1e-12, d1, -Inf)
+        # v * ( d1 + inside_term ) - g
+        out <- v * ( d1 + slop_val * (x_bar - z_val) ) - g
+        out <- ifelse(is.nan(out), -Inf, out)
+        return(out)
       }
+
     } else if (nmin == 1) { # Case 2. 1 = nmin < nmax : Use K LR-like stat
       g_eta_vec <-  g / eta^seq(1,K)
       z_vec <- sapply(g_eta_vec, z_fn)
@@ -340,6 +357,7 @@ SGLR_CI <- function(alpha,
         inner <- v * ( g_eta_vec + slop_vec * (x_bar - z_vec) )
         inner_max <- max(inner)
         out <- inner_max + log(sum(exp(inner - inner_max))) - g / eta
+        out <- ifelse(is.nan(out), -Inf, out)
         return(out)
       }
     } else { # Case 3. 1 < nmin < nmax : add the base line LR-like to the  K LR-like,
@@ -349,10 +367,13 @@ SGLR_CI <- function(alpha,
 
       dis_mart <- function(x_bar, v){
         inner <- v * ( g_eta_vec + slop_vec * (x_bar - z_vec) )
+        # inside_term <- ifelse(abs(x_bar - z_vec[1]) < 1e-12, g_eta_vec[1], slop_vec[1])
+        # inner[1] <- v * inside_term - g
         inner[1] <- inner[1] - g
         inner[-1] <- inner[-1] - g / eta
         inner_max <- max(inner)
         out <- inner_max + log(sum(exp(inner - inner_max)))
+        out <- ifelse(is.nan(out), -Inf, out)
         return(out)
       }
     }
@@ -372,55 +393,69 @@ SGLR_CI <- function(alpha,
     # Define the test function
     f_mu <- function(mu) stat_fn(x_bar, v, mu, is_pos)
 
-    if (is.null(CI_grid)){ # Compute the CI bound by using the binary search
-      # Compute the multiply factor for the searching range.
-      thres <- log(1 / alpha) / v
-      if (v < nmin){
-        m_factor <- max(100, 100 * log(nmin / v, base = 10))
-      } else if (v > nmax){
-        m_factor <- max(100, 100 * log(v / nmax, base = 10))
-      } else{
-        m_factor <- 5
-      }
+    # Compute the multiply factor for the searching range.
+    thres <- log(1 / alpha) / v
+    if (v < nmin){
+      m_factor <- max(100, 100 * log(nmin / v, base = 10))
+    } else if (v > nmax){
+      m_factor <- max(100, 100 * log(v / nmax, base = 10))
+    } else{
+      m_factor <- 5
+    }
 
-      if (is_pos){
-        if (is.null(mu_lower)){
-          # Use breg_inv functions for approximate searching range
-          z_bound_with_sign <- breg_neg_inv(thres, x_bar) - x_bar
-          search_range <- c(x_bar + m_factor * z_bound_with_sign,
-                            x_bar + z_bound_with_sign / 3)
-        } else { # If mu_lower is provided, use the naive search range
+    # Define search range.
+    if (is_pos){
+      if (is.null(mu_lower)){
+        # Use breg_inv functions for approximate searching range
+        z_bound_with_sign <- breg_neg_inv(thres, x_bar) - x_bar
+        search_range <- c(x_bar + m_factor * z_bound_with_sign,
+                          x_bar + z_bound_with_sign / 3)
+      } else {
+        if (!is.null(CI_grid)){ # If mu_lower and grid are both provided, use grid-search to refine the search space.
+          grid_n <- length(CI_grid)
+          grid_inter <- CI_grid[CI_grid <= x_bar]
+          stat_vec <- sapply(grid_inter, f_mu)
+          ind <- which(stat_vec < 0)
+          min_ind <- min(ind)
+          if (min_ind == 1){
+            return(grid_inter[1])
+          } else {
+            search_range <- grid_inter[c(min_ind - 1, min_ind)]
+          }
+        } else {# If mu_lower is provided but grid is not, use the naive search range
           search_range <- c(mu_lower, x_bar)
           if (f_mu(search_range[1]) <= 0) return(mu_lower)
         }
+      }
+    } else {
+      if (is.null(mu_upper)){
+        z_bound_with_sign <- breg_pos_inv(thres, x_bar) - x_bar
+        search_range <- c(x_bar + z_bound_with_sign / 3,
+                          x_bar + m_factor * z_bound_with_sign)
       } else {
-        if (is.null(mu_upper)){
-          z_bound_with_sign <- breg_pos_inv(thres, x_bar) - x_bar
-          search_range <- c(x_bar + z_bound_with_sign / 3,
-                            x_bar + m_factor * z_bound_with_sign)
-        } else{ # If mu_upper is provided, use the naive search range
+        if (!is.null(CI_grid)){ # If mu_lower and grid are both provided, use grid-search to refine the search space.
+          grid_n <- length(CI_grid)
+          grid_inter <- CI_grid[CI_grid >= x_bar]
+          stat_vec <- sapply(grid_inter, f_mu)
+          ind <- which(stat_vec < 0)
+          max_ind <- max(ind)
+          if (max_ind == length(grid_inter)){
+            return(grid_inter[length(grid_inter)])
+          } else {
+            search_range <-grid_inter[c(max_ind, max_ind + 1)]
+          }
+        } else{ # If mu_upper is provided but grid is not, use the naive search range
           search_range <- c(x_bar, mu_upper)
           if (f_mu(search_range[2]) <= 0) return(mu_upper)
         }
       }
-      # Find the boundary of mean space
-      bound <- stats::uniroot(f_mu,
-                              search_range,
-                              tol = 1e-12)$root
-    } else { # Compute the CI bound by using the grid-search
-      grid_n <- length(CI_grid)
-      if (is_pos){
-        grid_inter <- CI_grid[CI_grid <= x_bar]
-        stat_vec <- sapply(grid_inter, f_mu)
-        ind <- which(stat_vec < 0)
-        bound <- grid_inter[max(min(ind) - 1,1)]
-      } else {
-        grid_inter <- CI_grid[CI_grid >= x_bar]
-        stat_vec <- sapply(grid_inter, f_mu)
-        ind <- which(stat_vec < 0)
-        bound <- grid_inter[min(max(ind) + 1, length(grid_inter))]
-      }
     }
+
+    # Find the boundary of mean space
+    bound <- stats::uniroot(f_mu,
+                            search_range,
+                            tol = 1e-12)$root
+
     return(bound)
   }
 
@@ -453,7 +488,7 @@ SGLR_CI <- function(alpha,
               g = g,
               eta = eta,
               K = K,
-              CI_grid = CI_grid,
-              mu_range = c(mu_lower, mu_upper))
+              mu_range = c(mu_lower, mu_upper),
+              grid_by = grid_by)
   return(out)
 }

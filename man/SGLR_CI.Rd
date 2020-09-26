@@ -13,9 +13,9 @@ SGLR_CI(
   breg_pos_inv = function(d, mu_0) {     mu_0 + sqrt(2 * d) },
   breg_neg_inv = function(d, mu_0) {     mu_0 - sqrt(2 * d) },
   breg_derv = function(z, mu_0) {     z - mu_0 },
-  CI_grid = NULL,
   mu_lower = NULL,
-  mu_upper = NULL
+  mu_upper = NULL,
+  grid_by = NULL
 )
 }
 \arguments{
@@ -35,11 +35,11 @@ SGLR_CI(
 
 \item{breg_derv}{R function of \eqn{\nabla_z D(z, \mu_0)} which takes \code{z} and \code{mu_0} as inputs  (Default: \eqn{z - \mu_0}).}
 
-\item{CI_grid}{Grid of mean space. The grid must contain both minimum and maximum of possible mean parameters. Default is \code{NULL}. If \code{CI_grid} is not null, CI is computed based on the grid-search.}
-
 \item{mu_lower}{Lower bound of the mean parameter space (default = NULL).}
 
 \item{mu_upper}{Upper bound of the mean parameter space (default = NULL).}
+
+\item{grid_by}{The size of grid-window of mean space. Default is \code{NULL}.}
 }
 \value{
 A list of R functions for GLR-like, stitching and discrete mixture bound which takes sample mean \code{x_bar} and sample size \code{n} as the input and return the anytime-valid confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
@@ -52,8 +52,8 @@ A list of R functions for GLR-like, stitching and discrete mixture bound which t
 \item{g}{The boundary value for initial \code{nmin} and \code{nmax}.}
 \item{eta}{The eta value used to construct underlying martingales}
 \item{K}{The number of LR-like martingales used to construct bounds for \eqn{n \geq n_{\min}} part.}
-\item{CI_grid}{The numeric vector for used to compute bounds.}
 \item{mu_range}{Minimum and maximum of the mean parater space.}
+\item{grid_by}{The size of grid-window of mean space.}
 }
 }
 \description{

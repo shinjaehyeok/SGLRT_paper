@@ -146,13 +146,20 @@ test_that("Grid method and binary search must be consistent",{
   alpha <- 10^seq(-1,-3)
   n_vec <- 10^seq(1,5)
 
+  mu_lower <- -100
+  mu_upper <- 100
+  grid_by <- 1
+
   for (a in alpha){
     for (n in n_vec){
       nmin <- n
       large_ind <- which(n_vec >= n)
       nmax <- ifelse(length(large_ind) > 1, sample(n_vec[n_vec >= n], 1), n)
 
-      out_grid <- SGLR_CI(a, nmax, nmin,CI_grid = seq(-100,100, by = 1))
+      out_grid <- SGLR_CI(a, nmax, nmin,
+                          mu_lower = mu_lower,
+                          mu_upper = mu_upper,
+                          grid_by = grid_by)
       out <- SGLR_CI(a, nmax, nmin)
 
       v_vec <- 10^(seq(1,5 + 0.2, by = 0.1))
@@ -160,15 +167,15 @@ test_that("Grid method and binary search must be consistent",{
                                function(v) out$GLR_like_fn(0,v,is_pos = F))
       bound_GLR_like_grid <- sapply(v_vec,
                                     function(v) out_grid$GLR_like_fn(0,v,is_pos = F))
-      expect_true(sum(bound_GLR_like > bound_GLR_like_grid) == 0 )
-      expect_true(sum(bound_GLR_like + 1 < bound_GLR_like_grid) == 0 )
+      expect_true(sum(bound_GLR_like > bound_GLR_like_grid + 1e-8) == 0 )
+      expect_true(sum(bound_GLR_like + grid_by < bound_GLR_like_grid) == 0 )
 
       bound_dis_mix <- sapply(v_vec,
                               function(v) out$dis_mix_fn(0,v,is_pos = F))
       bound_dis_mix_grid <- sapply(v_vec,
                                    function(v) out_grid$dis_mix_fn(0,v,is_pos = F))
-      expect_true(sum(bound_dis_mix > bound_dis_mix_grid) == 0 )
-      expect_true(sum(bound_dis_mix + 1 < bound_dis_mix_grid) == 0 )
+      expect_true(sum(bound_dis_mix > bound_dis_mix_grid + 1e-8) == 0 )
+      expect_true(sum(bound_dis_mix + grid_by < bound_dis_mix_grid) == 0 )
       # print(c(a, nmin, nmax))
     }
   }
@@ -216,6 +223,9 @@ test_that("Grid method and binary search must be consistent for sub-Bernouill",{
   alpha <- 10^seq(-1,-3)
   n_vec <- 10^seq(1,5)
 
+  mu_lower <- 0
+  mu_upper <- 1
+  grid_by <- .1
 
   for (a in alpha){
     for (n in n_vec){
@@ -228,18 +238,17 @@ test_that("Grid method and binary search must be consistent for sub-Bernouill",{
                           breg_pos_inv = ber_fn_list$breg_pos_inv,
                           breg_neg_inv = ber_fn_list$breg_neg_inv,
                           breg_derv = ber_fn_list$breg_derv,
-                          CI_grid = seq(0,1, by =0.01),
-                          mu_lower = 0,
-                          mu_upper = 1)
+                          mu_lower = mu_lower,
+                          mu_upper = mu_upper,
+                          grid_by = grid_by)
 
       out <- SGLR_CI(a, nmax, nmin,
                      breg = ber_fn_list$breg,
                      breg_pos_inv = ber_fn_list$breg_pos_inv,
                      breg_neg_inv = ber_fn_list$breg_neg_inv,
                      breg_derv = ber_fn_list$breg_derv,
-                     CI_grid = NULL,
-                     mu_lower = 0,
-                     mu_upper = 1)
+                     mu_lower = mu_lower,
+                     mu_upper = mu_upper)
 
       v_vec <- c(seq(1,9), round(10^(seq(1,5 + 0.2, by = 0.1))))
 
@@ -251,8 +260,8 @@ test_that("Grid method and binary search must be consistent for sub-Bernouill",{
       # plot(v_vec, bound_GLR_like_grid, log = "x", type = "l")
       # lines(v_vec, bound_GLR_like, col = 2)
 
-      expect_true(sum(bound_GLR_like > bound_GLR_like_grid) == 0 )
-      expect_true(sum(bound_GLR_like + .01 < bound_GLR_like_grid) == 0 )
+      expect_true(sum(bound_GLR_like > bound_GLR_like_grid + 1e-8) == 0 )
+      expect_true(sum(bound_GLR_like + grid_by < bound_GLR_like_grid) == 0 )
 
       bound_dis_mix <- sapply(v_vec,
                                function(v) out$dis_mix_fn(x_bar,v,is_pos = F))
@@ -265,8 +274,8 @@ test_that("Grid method and binary search must be consistent for sub-Bernouill",{
       # plot(v_vec, bound_dis_mix_grid, log = "x")
       # points(v_vec, bound_dis_mix, col = 2)
 
-      expect_true(sum(bound_dis_mix > bound_dis_mix_grid) == 0 )
-      expect_true(sum(bound_dis_mix + .01 < bound_dis_mix_grid) == 0 )
+      expect_true(sum(bound_dis_mix > bound_dis_mix_grid + 1e-8) == 0 )
+      expect_true(sum(bound_dis_mix + grid_by < bound_dis_mix_grid) == 0 )
 
       # plot(v_vec, bound_GLR_like, log = "x")
       # points(v_vec, bound_dis_mix, col = 2)
