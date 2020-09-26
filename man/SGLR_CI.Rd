@@ -48,8 +48,12 @@ A list of R functions for GLR-like, stitching and discrete mixture bound which t
 \item{dis_mix_fn}{R function for the discrete mixture bound.}
 \item{log_GLR_like_stat_generator}{R function to generate log of GLR-like statistic minus the threshold.}
 \item{log_dis_mart_generator}{R function to generate log of GLR-like statistic minus the threshold.}
+\item{alpha}{alpha valud used to construct GLR-like and discrete mixture bound functions}
+\item{g}{The boundary value for initial \code{nmin} and \code{nmax}.}
 \item{eta}{The eta value used to construct underlying martingales}
 \item{K}{The number of LR-like martingales used to construct bounds for \eqn{n \geq n_{\min}} part.}
+\item{CI_grid}{The numeric vector for used to compute bounds.}
+\item{mu_range}{Minimum and maximum of the mean parater space.}
 }
 }
 \description{
