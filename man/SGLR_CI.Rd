@@ -15,7 +15,8 @@ SGLR_CI(
   breg_derv = function(z, mu_0) {     z - mu_0 },
   mu_lower = NULL,
   mu_upper = NULL,
-  grid_by = NULL
+  grid_by = NULL,
+  n_0 = 1L
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ SGLR_CI(
 \item{mu_upper}{Upper bound of the mean parameter space (default = NULL).}
 
 \item{grid_by}{The size of grid-window of mean space. Default is \code{NULL}.}
+
+\item{n_0}{Lower bound of the sample size on which test statistics and CI will be computed (default = 1L).}
 }
 \value{
 A list of R functions for GLR-like, stitching and discrete mixture bound which takes sample mean \code{x_bar} and sample size \code{n} as the input and return the anytime-valid confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.

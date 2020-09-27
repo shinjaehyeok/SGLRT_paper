@@ -10,7 +10,8 @@ SGLR_CI_additive(
   nmin = 1L,
   m_upper = 1000L,
   psi_star_inv = function(x) {     sqrt(2 * x) },
-  psi_star_derv = function(x) {     x }
+  psi_star_derv = function(x) {     x },
+  n_0 = 1L
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ SGLR_CI_additive(
 \item{psi_star_inv}{R function of \eqn{\psi_{+}^{*-1}} (Default: \eqn{\sqrt{2x}}) .}
 
 \item{psi_star_derv}{R function of \eqn{\nabla\psi^*} (Default: \eqn{x}).}
+
+\item{n_0}{Lower bound of the sample size on which test statistics and CI will be computed (default = 1L).}
 }
 \value{
 A list of R functions for GLR-like, stitching and discrete mixture bound which takes the sample size \code{n} as the input and return the distance from the sample mean to the upper bound of confidence interval at \code{n}. The list also contains related quantities to compute these bounds. See ADD_CITE for detailed explanations of these quantities.
