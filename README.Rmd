@@ -1,7 +1,5 @@
 ---
-output:
-  github_document:
-    pandoc_args: --webtex
+output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -48,30 +46,7 @@ install.packages("latex2exp")
 
 ### 1. Compare boundaries for sequential GLR tests. *(Fig. 3 in Section III-A)*
 
-For a given exponential family distribution, let $\mathrm{GLR}_n (> \mu_1, \leq\mu_0)$ be the GLR statistic based $n$ i.i.d. observations for the one-sided testing problem: 
-$$
-H_0 : \mu \leq \mu_0~~\text{vs}~~H_1 : \mu >\mu_1,
-$$
-for some $\mu_0  < \mu_0$ in the space of mean parameters. For any constant $g > 0$, Lorden 1973 proved the following upper bound on the boundary-crossing probability:<sup>[1](#myfootnote1)</sup>
-$$
-\sup_{\mu \leq \mu_0}\mathbb{P}_{\mu} \left(n \geq 1:   \log\mathrm{GLR}_n(>\mu_1,\leq\mu_0) \geq g\right)
-\leq \begin{cases} e^{-g} &\mbox{if } \mathrm{KL}(\mu_1,\mu_0) \geq g \\
-\left(1 + \frac{g}{\mathrm{KL}(\mu_1,\mu_0)} \right)e^{-g} & \mbox{otherwise }.
-\end{cases}
-$$
-
-
-Alternatively, in our paper, we proved the following inequality holds:
-
-$$
-\sup_{\mu \leq \mu_0}\mathbb{P}_{\mu} \left(\exists n \geq 1:   \log\mathrm{GLR}_n(>\mu_1,\leq\mu_0) \geq g\right) 
-\leq \begin{cases} e^{-g} &\mbox{if } \mathrm{KL}(\mu_1,\mu_0) \geq g \\
-\inf_{\eta >1} \left\lceil \log_\eta \left(\frac{g}{\mathrm{KL}(\mu_1,\mu_0)}\right)\right\rceil e^{-g / \eta} & \mbox{otherwise }. 
-\end{cases}
-$$
-(In the paper, a nonparametric generalization of the above inequaltiy was presented.)
-
-Now, for any $\alpha \in (0,1)$, let $g_\alpha^L(\mu_1,\mu_0)$ and $g_\alpha(\mu_1,\mu_0)$ be smallest boundary values which make RHS of two above inequalities equal to $\alpha$, respectively. The following Rcode reproduces the Fig. 3 in Section III-A in which we compared $g_\alpha^L(\mu_1,\mu_0)$ and $g_\alpha(\mu_1,\mu_0)$ for normal distributions with $\sigma = 1$. (In this case, $\mathrm{KL}(\mu_1 ,\mu_0) = (\mu_1 - \mu_0)^2 / 2$.)
+The following Rcode reproduces the Fig. 3 in Section III-A in which we compared Lorden's and ours boundary values of sequential GLR test for normal distributions.
 
 ```{r Fig.3}
 library(latex2exp)
@@ -106,31 +81,8 @@ legend("topleft", TeX(c(paste0("Lorden's ($\\alpha = ", alpha[1:3],"$)"), paste0
 ```
 
 ### 2. Ratio of CI's width to CLT *(Fig. 5 in Section IV-C)*
-For each $n$, let $\mathrm{CI}_n(\alpha)$ be a random set based on first $n$ observations $X_1, \dots, X_n$ from a distribution with mean $\mu$. If the sequence of random sets $\{\mathrm{CI}_n(\alpha)\}_{n \in \mathbb{N}}$ satisfies the following inequality:
-$$
-\mathbb{P}_\mu \left( \mu \in \mathrm{CI}_n(\alpha), \forall n \in \mathbb{N}\right) \geq 1-\alpha,~~\forall \mu \in (0,1),
-$$
-it is called a  *confidence sequence* with confidence level $\alpha$ (e.g, see [Howard et al., 2018](https://arxiv.org/abs/1810.08240)<sup>[2](#myfootnote2)</sup> and references therein for a comprehensive summary of related literature.)
 
-Based on the upper bound on the boundary crossing probability above, in our paper, we presented two novel confidence sequences called *GLR-like* and *discrete mixture* based confidence seqeunces. For sub-Gaussian distributions with parameter $\sigma$, The GLR-like confidence seqeunce is given by
-$$
-    \mathrm{CI}_n^{\mathrm{G}} := \begin{cases}  \left(\bar{X}_n - \sigma\sqrt{\frac{g_\alpha}{n_{\min}}}\left[  \sqrt{2}  + \frac{1}{\sqrt{2}}\left(\frac{n_{\min}}{n}-1\right)\right], \infty\right) &\mbox{if } n \in [n_0,n_{\min}) \\
- \left( \bar{X}_n - \sigma\sqrt{\frac{2g_\alpha}{n}}, \infty\right) &\mbox{if }  n \in [n_{\min}, n_{\max}] \\
- \left(\bar{X}_n - \sigma\sqrt{\frac{g_\alpha}{n_{\max}}}\left[ \sqrt{2}  + \frac{1}{\sqrt{2}}\left(\frac{n_{\max}}{n}-1\right)\right], \infty\right) &\mbox{if } n \in (n_{\max}, \infty)
-  \end{cases},
-$$
-for any given level $\alpha \in (0, 1)$ and target time interval $[n_{\min}, n_{\max}]$ on which the confidence seqeunce is time-uniformly close to the Chrenoff bound. Unlike the GLR-like one, the discrete mixture based confidence sequence $\{\mathrm{CI}_n^{\mathrm{DM}}\}$ does not have an explicit form and see the paper for the detailed explanation how to compute $\mathrm{CI}_n^{\mathrm{DM}}$ for given sample mean $\bar{X}_n$ and confidence level $\alpha$.  By the construction, we have $\mathrm{CI}_n^{\mathrm{G}} \subset \mathrm{CI}_n^{\mathrm{DM}}$. 
-
-In Section IV-C of the paper, we compare these bounds with the stithcing and normal mixture bounds in [Howard et al., 2018](https://arxiv.org/abs/1810.08240)<sup>[2](#myfootnote2)</sup> where each confidence intervals for stitching $\mathrm{CI}_{n}^{\mathrm{ST}}$ and normal mixture method $\mathrm{CI}_n^{\mathrm{NM}}$ is given by
-$$
-\begin{aligned}
-    \mathrm{CI}_{n}^{\mathrm{ST}} &:= \left(\bar{X}_n-  \frac{1.7}{\sqrt{n}}\sqrt{\log\log(2n) + 0.72 \log\left(\frac{5.2}{\alpha}\right)}, \infty \right) \\
-    \mathrm{CI}_{n}^{\mathrm{NM}} &:= \left(\bar{X}_n-  \sqrt{2 \left(1 + \frac{\rho}{n}\right) \log\left(\frac{1}{2\alpha} \sqrt{\frac{n + \rho}{\rho} + 1}\right)}, \infty \right),
-\end{aligned}
-$$
-where we set $\rho = 1260$ by following the setting in Figure 9 of [Howard et al., 2018](https://arxiv.org/abs/1810.08240)<sup>[2](#myfootnote2)</sup>. 
-
-The following Rcode reproduces the Fig. 5 in Section IV-C in which we compared ratios of widths of confidence intervals above to the poinstwise and asymptotically valid normal confidence intervals based on the central limit theorem.
+The following Rcode reproduces the Fig. 5 in Section IV-C in which we compared ratios of widths of confidence intervals to the poinstwise and asymptotically valid normal confidence intervals based on the central limit theorem.
 
 ```{r Fig.5}
 library(SGLRT)
@@ -239,12 +191,6 @@ ours_list_2 <- list(GLR_like_2 = GLR_like_2_vec,
          col = legend_col,
          bg= "white")
 ```
-
-## Reference
-<a name="myfootnote1">1</a>: G. Lorden, “Open-ended tests for koopman-darmois families,”The Annals of Statistics, vol. 1, no. 4, pp. 633–643, 1973.
-
-<a name="myfootnote2">2</a>: S. R. Howard, A. Ramdas, J. McAuliffe, and J. Sekhon, “Uniform, nonparametric, non-asymptotic confidence sequences,”arXiv preprint arXiv:1810.08240, 2018.
-
 
 
 
