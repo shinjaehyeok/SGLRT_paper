@@ -17,7 +17,7 @@ with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("shinjaehyeok/SGLRT_public")
+devtools::install_github("shinjaehyeok/SGLRT_paper")
 ```
 
 <!---You can install the released version of SGLRT from [CRAN](https://CRAN.R-project.org) with:
