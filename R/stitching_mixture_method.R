@@ -445,11 +445,15 @@ SGLR_CI <- function(alpha,
           grid_inter <- CI_grid[CI_grid <= x_bar]
           stat_vec <- sapply(grid_inter, f_mu)
           ind <- which(stat_vec < 0)
-          min_ind <- min(ind)
-          if (min_ind == 1){
-            return(grid_inter[1])
+          if (length(ind) == 0){
+            search_range <- c(grid_inter[length(grid_inter)],x_bar)
           } else {
-            search_range <- grid_inter[c(min_ind - 1, min_ind)]
+            min_ind <- min(ind)
+            if (min_ind == 1){
+              return(grid_inter[1])
+            } else {
+              search_range <- grid_inter[c(min_ind - 1, min_ind)]
+            }
           }
         } else {# If mu_lower is provided but grid is not, use the naive search range
           search_range <- c(mu_lower, x_bar)
@@ -468,11 +472,15 @@ SGLR_CI <- function(alpha,
           grid_inter <- CI_grid[CI_grid >= x_bar]
           stat_vec <- sapply(grid_inter, f_mu)
           ind <- which(stat_vec < 0)
-          max_ind <- max(ind)
-          if (max_ind == length(grid_inter)){
-            return(grid_inter[length(grid_inter)])
+          if (length(ind) == 0){
+            search_range <- c(x_bar, grid_inter[1])
           } else {
-            search_range <-grid_inter[c(max_ind, max_ind + 1)]
+            max_ind <- max(ind)
+            if (max_ind == length(grid_inter)){
+              return(grid_inter[length(grid_inter)])
+            } else {
+              search_range <-grid_inter[c(max_ind, max_ind + 1)]
+            }
           }
         } else{ # If mu_upper is provided but grid is not, use the naive search range
           search_range <- c(x_bar, mu_upper)

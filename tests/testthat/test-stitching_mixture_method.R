@@ -221,7 +221,7 @@ test_that("Grid method and binary search must be consistent for sub-Bernouill",{
   })
 
   alpha <- 10^seq(-1,-3)
-  n_vec <- 10^seq(1,5)
+  n_vec <- 10^seq(1,4)
 
   mu_lower <- 0
   mu_upper <- 1
@@ -229,7 +229,11 @@ test_that("Grid method and binary search must be consistent for sub-Bernouill",{
 
   for (a in alpha){
     for (n in n_vec){
-      x_bar <- sample(c(0,0.1,0.5,0.9,1), 1)
+      if (rbinom(1,1,0.5) == 0) {
+        x_bar <- sample(c(0,1), 1)
+      } else {
+        x_bar <- runif(1)
+      }
       nmin <- n
       large_ind <- which(n_vec >= n)
       nmax <- ifelse(length(large_ind) > 1, sample(n_vec[n_vec >= n], 1), n)
