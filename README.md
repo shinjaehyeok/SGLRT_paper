@@ -72,7 +72,10 @@ for (i in seq_along(alpha[1:3])){
            lty = i)
   }
 }
-legend("topleft", TeX(c(paste0("Lorden's ($\\alpha = ", alpha[1:3],"$)"), paste0("Ours ($\\alpha = ", alpha[1:3],"$)"))), col = c(rep(1,3), rep(2,3)), lty = rep(1:3,2))
+legend("topleft", 
+       TeX(c(paste0("Lorden's ($\\alpha = ", alpha[1:3],"$)"), 
+             paste0("Ours ($\\alpha = ", alpha[1:3],"$)"))),
+       col = c(rep(1,3), rep(2,3)), lty = rep(1:3,2))
 ```
 
 <img src="man/figures/README-Fig.3-1.png" width="100%" />
@@ -82,13 +85,28 @@ legend("topleft", TeX(c(paste0("Lorden's ($\\alpha = ", alpha[1:3],"$)"), paste0
 The following Rcode reproduces the Fig. 5 in Section IV-C in which we
 compared ratios of widths of confidence intervals to the pointwise and
 asymptotically valid normal confidence intervals based on the central
-limit theorem.
+limit theorem. To be specific, `Chernoff` is the nonasymptotic but
+pointwise valid confidence interval based on the Chernoff bound.
+`Stitching (HRMS'20)` and `Normal Mix. (HRMS'20)` are nonasymptotic and
+anytime-valid confidence intervals presented by [Howard et al.,
+(2020+)](https://arxiv.org/abs/1810.08240). `GLR-like (Ours)` and
+`Discrete Mix. (Ours)` are two nonasymptotic and anytime-valid
+confidence intervals proposed in our paper. `GLR-like` confidence
+intervals are based on the GLR statistics and its nonparametric
+extension, called GLR-like statistics. `GLR-like` confidence intervals
+are time-uniformly close to the Chrenoff bound on any given target time
+interval. `Discrete Mix.` confidence intervals are refined version of
+`GLR-like` ones. From the construction, `Discrete Mix.` confidence
+intervals are always tighter than their corresponding `GLR-like`
+confidence intervals. In the following plots, we use two different
+target time intervals to build `GLR-like` and `Discrete Mix.` confidence
+intervals.
 
 ``` r
 library(SGLRT)
 
-# Hoeffding
-hoeff <- function(v, alpha = 0.025){
+# Chernoff
+chornoff <- function(v, alpha = 0.025){
   sqrt(2  * log(1/alpha) / v)
 }
 
@@ -118,7 +136,7 @@ nmax1 <- nmax
 nmin1 = 1
 
 nmax2 <- nmax1 * 4
-nmin2 = nmax1 / 20
+nmin2 <- nmax1 / 20
 
 
 ours1 <- SGLR_CI_additive(alpha, nmax1, nmin1)
@@ -131,7 +149,7 @@ v <- 10^(seq(0,M + 0.2, length.out = 100))
 
 
 # Compute existing bounds
-hoeff_vec <- sapply(v, hoeff)
+chornoff_vec <- sapply(v, chornoff)
 CLT_vec <- sapply(v, CLT)
 normal_mix_vec <- sapply(v, normal_mix)
 stit_vec <- sapply(v, stitch)
@@ -153,43 +171,43 @@ ours_list_2 <- list(GLR_like_2 = GLR_like_2_vec,
                     our_dis_mix_2 = our_dis_mix_2_vec)
 
 # Plot ratio of bounds
- title <- "Ratio of CI's width to CLT"
- plot(v, hoeff_vec / CLT_vec, type = "l",
-         main = title,
-         ylab = "Ratio",
-         xlab = "n",
-         ylim = c(1, 4),
-         xlim = c(1, nmax))
-  col = 1
-  legend_col <- c(1)
-  for (i in seq_along(existing_list)){
-    col <- col + 1
-    legend_col <- c(legend_col, col)
-    lines(v, existing_list[[i]] / CLT_vec, col = col)
-  }
-  legend_lty <- rep(1, length(existing_list) + 1)
-   for (i in seq_along(ours_list_1)){
-      col <- col + 1
-      legend_col <- c(legend_col, col)
-      lines(v, ours_list_1[[i]] / CLT_vec,
-            lty = 2, lwd = 2, col = col)
-    }
-    legend_lty <- c(legend_lty, rep(2, length(ours_list_1)))
-    for (i in seq_along(ours_list_2)){
-      col <- col + 1
-      legend_col <- c(legend_col, col)
-      lines(v, ours_list_2[[i]] / CLT_vec,
-            lty = 4, lwd = 2, col = col)
-    }
-    legend_lty <- c(legend_lty, rep(4, length(ours_list_2)))
-    abline(v = c(nmin1, nmin2, nmax1, nmax2), lty = 3)
-    bounds_name <- c("Hoeffiding", "Stitching", "Normal Mixture",
-                "GLR-like 1", "Discrete Mixture 1",
-                "GLR-like 2", "Discrete Mixture 2")
-     legend("topright", bounds_name,
-         lty = legend_lty,
-         col = legend_col,
-         bg= "white")
+title <- "Ratio of CI's width to CLT"
+plot(v, chornoff_vec / CLT_vec, type = "l",
+     main = title,
+     ylab = "Ratio",
+     xlab = "n",
+     ylim = c(1, 4),
+     xlim = c(1, nmax))
+col = 1
+legend_col <- c(1)
+for (i in seq_along(existing_list)){
+  col <- col + 1
+  legend_col <- c(legend_col, col)
+  lines(v, existing_list[[i]] / CLT_vec, col = col)
+}
+legend_lty <- rep(1, length(existing_list) + 1)
+for (i in seq_along(ours_list_1)){
+  col <- col + 1
+  legend_col <- c(legend_col, col)
+  lines(v, ours_list_1[[i]] / CLT_vec,
+        lty = 2, lwd = 2, col = col)
+}
+legend_lty <- c(legend_lty, rep(2, length(ours_list_1)))
+for (i in seq_along(ours_list_2)){
+  col <- col + 1
+  legend_col <- c(legend_col, col)
+  lines(v, ours_list_2[[i]] / CLT_vec,
+        lty = 4, lwd = 2, col = col)
+}
+legend_lty <- c(legend_lty, rep(4, length(ours_list_2)))
+abline(v = c(nmin1, nmin2, nmax1, nmax2), lty = 3)
+bounds_name <- c("Chernoff", "Stitching (HRMS'20)", "Normal Mix. (HRMS'20)",
+                 "GLR-like 1 (Ours)", "Discrete Mix. 1 (Ours)",
+                 "GLR-like 2 (Ours)", "Discrete Mix. 2 (Ours)")
+legend("topright", bounds_name,
+       lty = legend_lty,
+       col = legend_col,
+       bg= "white")
 ```
 
 <img src="man/figures/README-Fig.5-1.png" width="100%" />
