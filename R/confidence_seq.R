@@ -114,6 +114,7 @@ const_boundary_cs <- function(alpha, nmax = NULL,
       if (d <= 0) stop("d must be a positive number.")
       prob_diff <- function(g){
         nmax <- g / d
+        if (nmin > nmax) nmin <- nmax
         min(cross_prob_cs_search(g, nmax, nmin, m_upper)$prob) - alpha
       }
     } else {
@@ -131,6 +132,9 @@ const_boundary_cs <- function(alpha, nmax = NULL,
                       interval = c(log(1/alpha), 10 * log(1/alpha)),
                       extendInt = "downX",
                       tol = 1e-10)$root
+  if (is.null(nmax))  nmax <- g / d
+  if (nmin > nmax) nmin <- nmax
+
   g_eta <- cross_prob_cs_search(g, nmax, nmin, m_upper)
   prob_min_ind <- which.min(g_eta$prob)
   prob <- g_eta$prob[prob_min_ind]

@@ -37,6 +37,8 @@ SGLR_CI_additive <- function(alpha,
   g <- param_out$g
   eta <- param_out$eta
   K <- param_out$K
+  if (is.null(nmax))  nmax <- g / d
+  if (nmin > nmax) nmin <- nmax
 
   # Compute GLR-like bounds
   psi_inv_val1 <- psi_star_inv(g / nmin)
@@ -191,6 +193,8 @@ SGLR_CI <- function(alpha,
   eta <- param_out$eta
   K <- param_out$K
   CI_grid <- NULL
+  if (is.null(nmax))  nmax <- g / d
+  if (nmin > nmax) nmin <- nmax
 
   # Construct grid if grid size and mean range are provided.
   if (!is.null(grid_by)){
