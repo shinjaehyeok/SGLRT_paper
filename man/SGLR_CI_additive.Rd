@@ -6,8 +6,9 @@
 \usage{
 SGLR_CI_additive(
   alpha,
-  nmax,
+  nmax = NULL,
   nmin = 1L,
+  d = NULL,
   m_upper = 1000L,
   psi_star_inv = function(x) {     sqrt(2 * x) },
   psi_star_derv = function(x) {     x },
@@ -17,9 +18,11 @@ SGLR_CI_additive(
 \arguments{
 \item{alpha}{An upper bound on the boundary crossing probability (positive numeric in \code{[1e-16,0.5]}).}
 
-\item{nmax}{Upper bound of the target time interval.}
+\item{nmax}{Upper bound of the target time interval. If both \code{nmax} and \code{d} are provided, \code{nmax} will be ignored. (default = NULL)}
 
 \item{nmin}{Lower bound of the target time interval. (default = 1L)}
+
+\item{d}{Bregman divergence between the null and alternative spaces. Either \code{d} or \code{nmax} must be specified (default = NULL).}
 
 \item{m_upper}{Upper bound on the grid-search for m (default = 1e+3L).}
 

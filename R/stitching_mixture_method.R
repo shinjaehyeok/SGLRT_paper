@@ -24,15 +24,16 @@
 #' SGLR_CI_additive(0.025, 1e+6, 1e+2)
 
 SGLR_CI_additive <- function(alpha,
-                             nmax,
+                             nmax = NULL,
                              nmin = 1L,
+                             d = NULL,
                              m_upper = 1e+3L,
                              psi_star_inv = function(x){sqrt(2 * x)},
                              psi_star_derv = function(x){x},
                              n_0 = 1L)
 {
   # Calculate g, eta, K
-  param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+  param_out <- const_boundary_cs(alpha, nmax, nmin, d, m_upper)
   g <- param_out$g
   eta <- param_out$eta
   K <- param_out$K
@@ -171,8 +172,9 @@ SGLR_CI_additive <- function(alpha,
 #' SGLR_CI(0.025, 1e+6, 1e+2)
 
 SGLR_CI <- function(alpha,
-                    nmax,
+                    nmax = NULL,
                     nmin = 1L,
+                    d = NULL,
                     m_upper = 1e+3L,
                     breg = function(mu_1, mu_0){(mu_1 - mu_0)^2 / 2},
                     breg_pos_inv = function(d, mu_0){mu_0 + sqrt(2 * d)},
@@ -184,7 +186,7 @@ SGLR_CI <- function(alpha,
                     n_0 = 1L)
 {
   # Calculate g, eta, K for common parameters for both generators
-  param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+  param_out <- const_boundary_cs(alpha, nmax, nmin, d, m_upper)
   g <- param_out$g
   eta <- param_out$eta
   K <- param_out$K
@@ -231,7 +233,7 @@ SGLR_CI <- function(alpha,
             nmax <- nmin
           }
           # Update boundary value for the updated nmin and nmax
-          param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+          param_out <- const_boundary_cs(alpha, nmax, nmin, d, m_upper)
           g <- param_out$g
           eta <- param_out$eta
           K <- param_out$K
@@ -246,7 +248,7 @@ SGLR_CI <- function(alpha,
         if (nmin < n_0){
           nmin <- n_0
           nmax <- ifelse(nmax > nmin, nmax, nmin)
-          param_out <- const_boundary_cs(alpha, nmax, nmin, m_upper)
+          param_out <- const_boundary_cs(alpha, nmax, nmin, d, m_upper)
           g <- param_out$g
           eta <- param_out$eta
           K <- param_out$K

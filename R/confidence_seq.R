@@ -57,8 +57,8 @@ cross_prob_cs <- function(g, nmax,
 # cross_prob_cs_search(1, 1e+6)
 # cross_prob_cs_search(2, 1e+8, 1e+2, m_upper = 500L)
 cross_prob_cs_search <- function(g, nmax,
-                              nmin = 1L,
-                              m_upper = 1e+3L) {
+                                 nmin = 1L,
+                                 m_upper = 1e+3L) {
 
   if (nmin > nmax) stop("nmin must be smaller than or equal to nmax.")
   if (g <= 0) stop("g must be a positive number.")
@@ -93,8 +93,9 @@ cross_prob_cs_search <- function(g, nmax,
 #' \code{const_boundary_cs} is used to compute the constant threshold for the GLR-like confidence sequences with finite target time interval.
 #'
 #' @param alpha An upper bound on the boundary crossing probability (positive numeric in \code{[1e-16,0.5]}).
-#' @param nmax Upper bound of the target time interval.
+#' @param nmax Upper bound of the target time interval. If both \code{nmax} and \code{d} are provided, \code{nmax} will be ignored. (default = NULL)
 #' @param nmin Lower bound of the target time interval. (default = 1L)
+#' @param d Bregman divergence between the null and alternative spaces. Either \code{d} or \code{nmax} must be specified (default = NULL).
 #' @param m_upper Upper bound on the grid-search for m (default = 1e+3L).
 #'
 #' @return Constant threshold for GLR-like confidence sequence with level \code{alpha} based on Theorem 7.
@@ -102,14 +103,30 @@ cross_prob_cs_search <- function(g, nmax,
 #' @examples
 #' const_boundary_cs(0.05, 1e+6)
 #' const_boundary_cs(0.025, 1e+8, 1e+2, m_upper = 100L)
-const_boundary_cs <- function(alpha, nmax,
+const_boundary_cs <- function(alpha, nmax = NULL,
                               nmin = 1L,
-                           m_upper = 1e+3L) {
+                              d = NULL,
+                              m_upper = 1e+3L) {
   if (alpha < 1e-16 | alpha > 0.5) stop("alpha must be in [1e-16,0.5].")
-  if (nmin > nmax) stop("nmin must be smaller than or equal to nmax.")
-  prob_diff <- function(g){
-    min(cross_prob_cs_search(g, nmax, nmin, m_upper)$prob) - alpha
+
+  if (is.null(nmax)){
+    if (!is.null(d)){
+      if (d <= 0) stop("d must be a positive number.")
+      prob_diff <- function(g){
+        nmax <- g / d
+        min(cross_prob_cs_search(g, nmax, nmin, m_upper)$prob) - alpha
+      }
+    } else {
+      stop("Either d (positive numeric) or nmax(positive integer) must be specified.")
+    }
+  } else {
+    if (!is.null(d)) warning("Both d and nmax are provided - d will be ignored.")
+    if (nmin > nmax) stop("nmin must be smaller than or equal to nmax.")
+    prob_diff <- function(g){
+      min(cross_prob_cs_search(g, nmax, nmin, m_upper)$prob) - alpha
+    }
   }
+
   g <- stats::uniroot(prob_diff,
                       interval = c(log(1/alpha), 10 * log(1/alpha)),
                       extendInt = "downX",
