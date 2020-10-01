@@ -420,6 +420,206 @@ SGLR_CI <- function(alpha,
     return(out)
   }
 
+  # Compute adaptive discrete mixture statistics
+  adap_dis_mart_generator <- function(mu_0, is_pos = TRUE){
+    # Initialize parameters
+    initial_out <- initial_fn(mu_0, is_pos)
+    if (initial_out$is_trivial) {
+      out <- list(stat_fn = initial_out$stat_fn,
+                  is_trivial = TRUE,
+                  alpha = alpha,
+                  nmax = nmax,
+                  nmin = nmin,
+                  g = g,
+                  n_0 = n_0)
+      return(out)
+    }
+
+    # Set parameters
+    g <- initial_out$params$g
+    eta <- initial_out$params$eta
+    K <- initial_out$params$K
+    nmin <- initial_out$nmin
+    nmax <- initial_out$nmax
+    n_0_updated <- initial_out$n_0_updated
+
+    # Get the mean maping
+    z_fn <- initial_out$z_fn
+
+    # Define supporting functions
+    is_pos_val <- function(x) ifelse(sign(x - mu_0) == 1, TRUE, FALSE)
+
+    # Compute dis. mixture statistic
+    if (nmin == nmax){ # Case 1. nmin = nmax: Use single LR-like stat
+      # Initialize values
+      d1 <- g / nmax
+      z_val <- z_fn(d1)
+      slop_val <- breg_derv(z_val, mu_0)
+      prev_x_bar <- 0
+      prev_v <- 0
+      prev_mtg <- -Inf
+      update_dis_mart <- function(new_x){
+        v <- prev_v + 1
+        x_bar <- prev_x_bar * prev_v + new_x
+        x_bar <- x_bar / v
+        if (v < n_0_updated){
+          prev_v <<- v
+          prev_x_bar <<- x_bar
+          out <- list(stat_val = -Inf,
+                      x_bar = x_bar,
+                      n = v)
+          return(out)
+        }
+        # If v >= max(nmax, 2), use adaptive z value
+        if (v >= max(nmax, 2)){
+          z_val <- ifelse(is_pos_val(prev_x_bar) == is_pos,
+                          prev_x_bar, mu_0)
+          slop_val <- breg_derv(z_val, mu_0)
+          d1 <- breg(z_val, mu_0)
+        }
+        if (prev_mtg == -Inf){
+          new_mtg <- d1 + slop_val * (new_x - z_val)
+        } else {
+          new_mtg <- prev_mtg + d1 + slop_val * (new_x - z_val)
+        }
+        new_mtg <- ifelse(is.nan(new_mtg), -Inf, new_mtg)
+        # Update v, x_bar and mtg
+        prev_v <<- v
+        prev_x_bar <<- x_bar
+        prev_mtg <<- new_mtg
+        out <- list(stat_val = new_mtg - g,
+                    x_bar = x_bar,
+                    n = v)
+        return(out)
+      }
+
+    } else if (nmin == n_0) { # Case 2. 1 = nmin < nmax : Use K LR-like stat
+      nmax_vec <- eta^seq(1,K)
+      g_eta_vec <-  g / nmax_vec
+      z_vec <- sapply(g_eta_vec, z_fn)
+      slop_vec <- sapply(z_vec, function(z) breg_derv(z, mu_0))
+
+      prev_x_bar <- 0
+      prev_v <- 0
+      prev_mtg_vec <- rep(-Inf, K)
+      update_dis_mart <- function(new_x){
+        v <- prev_v + 1
+        x_bar <- prev_x_bar * prev_v + new_x
+        x_bar <- x_bar / v
+        if (v < n_0_updated){
+          prev_v <<- v
+          prev_x_bar <<- x_bar
+          out <- list(stat_val = -Inf,
+                      x_bar = x_bar,
+                      n = v)
+          return(out)
+        }
+
+        # compute adaptive z values
+        z_adap <- ifelse(is_pos_val(prev_x_bar) == is_pos,
+                         prev_x_bar, mu_0)
+        slop_adap <- breg_derv(z_adap, mu_0)
+        g_eta_adap <- breg(z_adap, mu_0)
+        for (k in 1:K){ # Will be vectorized
+          prev_mtg_vec[k] <<- ifelse(prev_mtg_vec[k] == -Inf,
+                                     0, prev_mtg_vec[k])
+          # If v >= max(nmax[k], 2), use adaptive z value
+          if (v >= max(nmax_vec[k], 2)){
+            z_vec[k] <-  z_adap
+            slop_vec[k] <- slop_adap
+            g_eta_vec[k] <- g_eta_adap
+          }
+        }
+        new_mtg <- prev_mtg_vec + g_eta_vec + slop_vec * (new_x - z_vec)
+        for (k in 1 :K){
+          new_mtg[k] <- ifelse(is.nan(new_mtg[k]), -Inf, new_mtg[k])
+        }
+        new_mtg_max <- max(new_mtg)
+        stat_val <- new_mtg_max + log(sum(exp(new_mtg  - new_mtg_max))) - g / eta
+        # Update v, x_bar and mtg
+        prev_v <<- v
+        prev_x_bar <<- x_bar
+        prev_mtg_vec <<- new_mtg
+
+        out <- list(stat_val = stat_val,
+                    x_bar = x_bar,
+                    n = v)
+        return(out)
+      }
+
+    } else { # Case 3. 1 < nmin < nmax : add the base line LR-like to the  K LR-like,
+      eta_vec <- eta^seq(0,K)
+      nmax_vec <- eta_vec * nmin
+      g_eta_vec <-  g / eta^seq(0,K) / nmin
+
+      z_vec <- sapply(g_eta_vec, z_fn)
+      slop_vec <- sapply(z_vec, function(z) breg_derv(z, mu_0))
+
+      prev_x_bar <- 0
+      prev_v <- 0
+      prev_mtg_vec <- rep(-Inf, K + 1)
+      update_dis_mart <- function(new_x){
+        v <- prev_v + 1
+        x_bar <- prev_x_bar * prev_v + new_x
+        x_bar <- x_bar / v
+        if (v < n_0_updated){
+          prev_v <<- v
+          prev_x_bar <<- x_bar
+          out <- list(stat_val = -Inf,
+                      x_bar = x_bar,
+                      n = v)
+          return(out)
+        }
+
+        # compute adaptive z values
+        z_adap <- ifelse(is_pos_val(prev_x_bar) == is_pos,
+                         prev_x_bar, mu_0)
+        slop_adap <- breg_derv(z_adap, mu_0)
+        g_eta_adap <- breg(z_adap, mu_0)
+        for (k in 1:(K+1)){ # Will be vectorized
+          prev_mtg_vec[k] <<- ifelse(prev_mtg_vec[k] == -Inf,
+                                     0, prev_mtg_vec[k])
+          # If v >= max(nmax[k], 2), use adaptive z value
+          if (v >= max(nmax_vec[k], 2)){
+            z_vec[k] <-  z_adap
+            slop_vec[k] <- slop_adap
+            g_eta_vec[k] <- g_eta_adap
+          }
+        }
+        new_mtg <- prev_mtg_vec + g_eta_vec + slop_vec * (new_x - z_vec)
+        for (k in 1:(K+1)){
+          new_mtg[k] <- ifelse(is.nan(new_mtg[k]), -Inf, new_mtg[k])
+        }
+        # Update v, x_bar and mtg
+        prev_v <<- v
+        prev_x_bar <<- x_bar
+        prev_mtg_vec <<- new_mtg
+
+        # Compute sum of mtgs
+        new_mtg[1] <- new_mtg[1] - g
+        new_mtg[-1] <- new_mtg[-1] - g / eta
+
+        new_mtg_max <- max(new_mtg)
+        stat_val <- new_mtg_max + log(sum(exp(new_mtg  - new_mtg_max)))
+        out <- list(stat_val = stat_val,
+                    x_bar = x_bar,
+                    n = v)
+        return(out)
+      }
+
+    }
+    out <- list(update_stat_fn = update_dis_mart,
+                is_trivial = FALSE,
+                alpha = alpha,
+                nmax = nmax,
+                nmin = nmin,
+                g = g,
+                n_0 = n_0,
+                n_0_updated = n_0_updated)
+    return(out)
+  }
+
+
   # Compute CI bound
 
   find_CI_fn <- function(stat_fn, x_bar, v, is_pos = TRUE){
@@ -542,6 +742,7 @@ SGLR_CI <- function(alpha,
               dis_mix_fn = dis_mix_fn,
               log_GLR_like_stat_generator = GLR_like_stat_generator,
               log_dis_mart_generator = dis_mart_generator,
+              adap_log_dis_mart_generator =  adap_dis_mart_generator,
               alpha = alpha,
               nmax = nmax,
               nmin = nmin,
