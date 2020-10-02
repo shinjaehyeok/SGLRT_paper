@@ -212,27 +212,14 @@ legend("topright", bounds_name,
 
 <img src="man/figures/README-Fig.5-1.png" width="100%" />
 
-### 3\. Ratio of CI’s width to CLT *(Fig. 5 in Section IV-C)*
+### 3\. Efficiency of GLR-like and discrete mixture tests *(Table I-VI in Appendix D)*
 
-The following Rcode reproduces the Fig. 5 in Section IV-C in which we
-compared ratios of widths of confidence intervals to the pointwise and
-asymptotically valid normal confidence intervals based on the central
-limit theorem. To be specific, `Chernoff` is the nonasymptotic but
-pointwise valid confidence interval based on the Chernoff bound.
-`Stitching (HRMS'20)` and `Normal Mix. (HRMS'20)` are nonasymptotic and
-anytime-valid confidence intervals presented by [Howard et al.,
-(2020+)](https://arxiv.org/abs/1810.08240). `GLR-like (Ours)` and
-`Discrete Mix. (Ours)` are two nonasymptotic and anytime-valid
-confidence intervals proposed in our paper. `GLR-like` confidence
-intervals are based on the GLR statistics and its nonparametric
-extension, called GLR-like statistics. `GLR-like` confidence intervals
-are time-uniformly close to the Chrenoff bound on any given target time
-interval. `Discrete Mix.` confidence intervals are refined version of
-`GLR-like` ones. From the construction, `Discrete Mix.` confidence
-intervals are always tighter than their corresponding `GLR-like`
-confidence intervals. In the following plots, we use two different
-target time intervals to build `GLR-like` and `Discrete Mix.` confidence
-intervals.
+The following Rcode reproduces Table I-VI in Appendix D in which we
+compared performances of sequential `GLR-like` and `Discrete mixture`
+tests to standard fixed sample size based tests for Gaussian and
+Bernoulli observations. In this document, we repeated the simulation
+only `100` times to save the computation time but, in the paper, the
+simulation result based on `2000` times repeatation is presented.
 
 ``` r
 # Type 1 and Type 2 error control simulation
@@ -450,6 +437,43 @@ summ_simul <- function(result_name,
 
 #### 3-1. Gaussian case
 
+In the Gaussian setting, we compared sequential `GLL-like` and `Discrete
+mixture` tests to the `Z-test`. We set the null hypothesis as the mean
+of the Gaussian distribution is less than or equal to `0`, and the
+alternative hypothesis as the true mean is greater than `0.1`. The
+`Z-test` was performed based on a fixed sample size to make the test
+control both type-1 and type-2 errors by `0.1`. In the following three
+tables, results of all three testing procedures are summarized. In the
+first table, we show that, for each underlying true mean, how frequently
+each testing procedure rejects the null hypothesis. Here the column
+`Z-test (p-hacking)` represents the naive usage of `Z-test` as a
+sequential procedure in which we stop and reject the null whenever
+p-value of the `Z-test` goes below the level `0.1`. This is an example
+of p-hacking which inflates the type-1 error significantly larger than
+the target level. From the first table, we can check that the `Z-test`
+with continuous monitoring of p-values yields a large type 1 error
+(`0.43`) even under a null distribution (`mean = -0.5`) which is a way
+from the boundary of the null. In contrast, for all other testing
+procedures, type 1 errors are controlled under the null distributions.
+
+For alternative distributions (`mean > 0.1`), the `Z-test` has larger
+powers than the prespecified bound (`0.9`) as expected. Note that the
+`discrete mixture` based sequential test achieves almost the same power
+compared to the `Z-test`. However, as we can check from the second and
+third tables, under the alternative distributions, the `discrete
+mixture` test detects the signal faster than the `Z-test` both on
+average and with high probability. The `GLR-like` test yields a weaker
+power at the boundary of the alternative space but it achieves higher
+powers and smaller sample size as the underlying true means being
+farther away from the boundary.
+
+However, `GLR-like` and `discrete mixture` tests do not always perform
+better than the `Z-test`. If the underlying true mean lies between
+boundaries of null and alternative spaces, both test have weaker power
+and requires more samples to detect the signal compared to the `Z-test`.
+Therefore, we recommend to set the boundary of the alternative
+conservatively in practice.
+
 ``` r
 # Gaussian simulation
 set.seed(1)
@@ -477,16 +501,11 @@ sample_size_G <- summ_simul("sample_size",
 early_stop_ratio_G <- summ_simul("early_stop_ratio",
                                simul_G_out,
                                mu_true_vec)
-
-print_type <- "html"
-print(xtable::xtable(reject_rate_G,
-                     caption = "Estimated probabilities of rejecting the null hypothesis. (Gaussian)"),
-      type = print_type)
 ```
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  1 23:56:55 2020 -->
+<!-- Fri Oct  2 02:09:11 2020 -->
 
 <table border="1">
 
@@ -776,16 +795,9 @@ exact\_test
 
 </table>
 
-``` r
-
-print(xtable::xtable(sample_size_G[c(1,3,4,5)],
-                     caption = "Estimated average sample sizes of testing procedures. (Gaussian)"),
-      type = print_type)
-```
-
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  1 23:56:55 2020 -->
+<!-- Fri Oct  2 02:09:11 2020 -->
 
 <table border="1">
 
@@ -1033,15 +1045,9 @@ exact\_test
 
 </table>
 
-``` r
-print(xtable::xtable(early_stop_ratio_G[c(1,3,4)],
-                     caption = "Estimated probabilities of tests being stopped earlier than Z-test."),
-      type = print_type)
-```
-
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  1 23:56:55 2020 -->
+<!-- Fri Oct  2 02:09:11 2020 -->
 
 <table border="1">
 
@@ -1249,6 +1255,47 @@ dis\_mix
 
 #### 3-2. Bernoulli case
 
+In the Bernoulli setting, we compared sequential `GLL-like` and
+`Discrete mixture` tests to the `exact binomial` test. We set the null
+hypothesis as the mean of the Bernoulli distribution is less than or
+equal to `0.1`, and the alternative hypothesis as the true mean is
+greater than `0.12`. The `exact binomial` test was performed based on a
+fixed sample size to make the test control both type-1 and type-2 errors
+by `0.1`. The following three tables summarize the simulation result. In
+all three tables, we can check the same pattern we observed from the
+Gaussian case. In the first table, we show that, for each underlying
+true mean, how frequently each testing procedure rejects the null
+hypothesis. Here the column `Exact binomial (p-hacking)` represents the
+naive usage of the exact test as a sequential procedure in which we stop
+and reject the null whenever p-value of the test goes below the level
+`0.1`. As we observed before, the p-hacking inflates the type-1 error
+significantly larger than the target level. From the table, we can check
+that the `exact binomial test` with continuous monitoring of p-values
+yields a large type 1 error (`0.23`) even under a null distribution
+(`mean = 0.09`) which is a way from the boundary of the null. In
+contrast, for all other testing procedures, type 1 errors are controlled
+under the null distributions.
+
+For alternative distributions (`mean > 0.12`), the `exact binomial` test
+has larger powers than the prespecified bound `0.9` as expected. Again,
+as same as the Gaussian case, the `discrete mixture` based sequential
+test achieves almost the same power compared to the `exact binomial`
+test. However, as we can check from the second and third tables, under
+the alternative distributions, the `discrete mixture` test uses, on
+average and with a high probability, smaller numbers of samples to
+detect the signal than the `exact binomial` test with a fixed sample
+size. The `GLR-like` test yields a weaker power at the boundary of the
+alternative space but it achieves higher powers and smaller sample size
+as the underlying true means being farther away from the boundary.
+
+However, as same as the Gaussian case, `GLR-like` and `discrete mixture`
+tests do not always perform better than the `exact binomial` test. If
+the underlying true mean lies between boundaries of null and alternative
+spaces, both test have weaker power and requires more samples to detect
+the signal compared to the `exact binomial`. Therefore, it is
+recommended to set the boundary of the alternative close to the boundary
+of the null in practice.
+
 ``` r
 # Bernoulli simulation
 set.seed(1)
@@ -1280,16 +1327,11 @@ sample_size_ber <- summ_simul("sample_size",
 early_stop_ratio_ber <- summ_simul("early_stop_ratio",
                                simul_ber_out,
                                mu_true_vec)
-
-print_type <- "html"
-print(xtable::xtable(reject_rate_ber,
-                     caption = "Estimated probabilities of rejecting the null hypothesis. (Bernoulli)"),
-      type = print_type)
 ```
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  1 23:58:56 2020 -->
+<!-- Fri Oct  2 02:10:57 2020 -->
 
 <table border="1">
 
@@ -1579,16 +1621,9 @@ exact\_test
 
 </table>
 
-``` r
-
-print(xtable::xtable(sample_size_ber[c(1,3,4,5)],
-                     caption = "Estimated average sample sizes of testing procedures. (Bernoulli)"),
-      type = print_type)
-```
-
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  1 23:58:56 2020 -->
+<!-- Fri Oct  2 02:10:57 2020 -->
 
 <table border="1">
 
@@ -1836,15 +1871,9 @@ exact\_test
 
 </table>
 
-``` r
-print(xtable::xtable(early_stop_ratio_ber[c(1,3,4)],
-                     caption = "Estimated probabilities of tests being stopped earlier than the exact binomial test."),
-      type = print_type)
-```
-
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  1 23:58:56 2020 -->
+<!-- Fri Oct  2 02:10:57 2020 -->
 
 <table border="1">
 
