@@ -282,7 +282,9 @@ SGLR_CI <- function(alpha,
                   nmax = nmax,
                   nmin = nmin,
                   g = g,
-                  n_0 = n_0)
+                  n_0 = n_0,
+                  mu_0 = mu_0,
+                  is_pos = is_pos)
       return(out)
     }
 
@@ -333,7 +335,9 @@ SGLR_CI <- function(alpha,
                 nmin = nmin,
                 g = g,
                 n_0 = n_0,
-                n_0_updated = n_0_updated)
+                n_0_updated = n_0_updated,
+                mu_0 = mu_0,
+                is_pos = is_pos)
     return(out)
   }
 
@@ -416,7 +420,9 @@ SGLR_CI <- function(alpha,
                 nmin = nmin,
                 g = g,
                 n_0 = n_0,
-                n_0_updated = n_0_updated)
+                n_0_updated = n_0_updated,
+                mu_0 = mu_0,
+                is_pos = is_pos)
     return(out)
   }
 
@@ -431,7 +437,9 @@ SGLR_CI <- function(alpha,
                   nmax = nmax,
                   nmin = nmin,
                   g = g,
-                  n_0 = n_0)
+                  n_0 = n_0,
+                  mu_0 = mu_0,
+                  is_pos = is_pos)
       return(out)
     }
 
@@ -615,7 +623,9 @@ SGLR_CI <- function(alpha,
                 nmin = nmin,
                 g = g,
                 n_0 = n_0,
-                n_0_updated = n_0_updated)
+                n_0_updated = n_0_updated,
+                mu_0 = mu_0,
+                is_pos = is_pos)
     return(out)
   }
 
