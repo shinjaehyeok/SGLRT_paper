@@ -268,136 +268,6 @@ ber_sample <- function(n, mu_true){
   rbinom(n, 1, prob = mu_true)
 }
 
-# R function to simulate sequential test and fixed sample size test.
-test_simul <- function(mu_target,
-                       mu_true = mu_target,
-                       mu_0 = 0.5,
-                       alpha = 0.05,
-                       beta = 0.8, 
-                       B = 1000,
-                       print_progress = TRUE,
-                       print_result = FALSE,
-                       sample_generator = G_sample,
-                       power_fn = G_pwr,
-                       fixed_test_fn = z_test,
-                       seq_test_fn = seq_G_test_generator){
-  
-  # Calculate sample size to achieve the target power by the fixed sample size test
-  if (mu_target > mu_0){
-    sample_size <- stats::uniroot(function(n){
-      power_fn(n, mu_target, mu_0, alpha) - beta
-    },
-    c(10, 1e+4))$root
-    n_exact <- ceiling(sample_size) 
-  } else if (mu_target == mu_0){
-    n_exact <- 1e+3
-  } else {
-    stop("This simulation is designed for mu_target >= mu_0 case. Need to use larger mu_target")
-  }
-  
-  # Set terminal time of sequential test. 
-  n <- 2 * n_exact
-  
-  # Set target time interval
-  nmax <- n
-  nmin <- round(max(10, n_exact / 10))
-  
-  # Range of experimentation
-  n_vec <- seq(1, n)
-  
-  # Define test functions
-  test_list <- list(exact = NULL,
-                    GLR_like = NULL,
-                    dis_mix = NULL
-  )
-  
-  # Exact test
-  test_list$exact <- function(x_bar, n){
-    exact_out <-  fixed_test_fn(x_bar, n, mu_0, alpha)
-    return(exact_out)
-  }
-  
-  
-  # Sequential tests
-  G_out <- seq_test_fn(alpha, nmax, nmin)
-  
-  
-  GLR_test <- G_out$log_GLR_like_stat_generator(mu_0, is_pos = TRUE)
-  test_list$GLR_like <- GLR_test$stat_fn
-  
-  dis_mix_test <- G_out$log_dis_mart_generator(mu_0, is_pos = TRUE)
-  test_list$dis_mix <- dis_mix_test$stat_fn
-  
-  
-  # Type 1 error or power simulation
-  is_reject <- function(test_value){
-    num_reject <- sum(test_value > 0)
-    return(ifelse(num_reject > 0, 1 ,0))
-  }
-  
-  reject <- list(exact_hacking = numeric(B),
-                 GLR_like = numeric(B),
-                 dis_mix = numeric(B),
-                 exact_test = numeric(B))
-  
-  sample_size_list <- list(exact_hacking = numeric(B),
-                           GLR_like = numeric(B),
-                           dis_mix = numeric(B),
-                           exact_test = numeric(B))
-  i <- 0
-  if (print_progress)  pb <- txtProgressBar(min = 0, max = B, style = 3)
-  while (i < B){
-    i <- i + 1
-    x_vec <- sample_generator(n, mu_true)
-    x_bar_vec <- cumsum(x_vec) / n_vec
-    test_value_list <- list(exact_hacking = NULL,
-                            GLR_like = NULL,
-                            dis_mix = NULL,
-                            exact_test = NULL
-    )
-    for (j in seq_along(test_list)){
-      test_value_list[[j]] <- mapply(test_list[[j]], x_bar_vec, n_vec)      
-    }
-    test_value_list$exact_test <-  test_value_list$exact_hacking[n_exact]
-    
-    for (k in seq_along(test_value_list)){
-      if (k == length(test_value_list)) next
-      reject_n <- which(test_value_list[[k]] >= 0)
-      stopped_n <- ifelse(length(reject_n) == 0, n, min(reject_n)) 
-      sample_size_list[[k]][i] <- stopped_n
-      reject[[k]][i] <- is_reject(test_value_list[[k]])
-    }
-    sample_size_list$exact_test[i] <- n_exact
-    reject$exact_test[i] <- is_reject(test_value_list$exact_test)
-    if (print_progress) setTxtProgressBar(pb, i)
-  }
-  if (print_progress)  close(pb)
-  
-  reject_rate <- sapply(reject, mean)
-  sample_size <- sapply(sample_size_list, mean)
-  early_stop_ratio <- sapply(seq(1, length(sample_size_list)), 
-                             function(k) mean(sample_size_list[[k]] <= n_exact))
-  out <- list(reject_rate = reject_rate,
-              sample_size = sample_size,
-              reject_list = reject,
-              sample_size_list = sample_size_list,
-              early_stop_ratio = early_stop_ratio,
-              mu_target = mu_target,
-              mu_true = mu_true,
-              mu_0 = mu_0,
-              alpha = alpha,
-              beta = beta)
-  
-  if (print_result){
-    print(reject_rate)
-    print(sample_size)
-    print(early_stop_ratio)
-    hist(sample_size_list$dis_mix, xlim = c(1, n))
-    abline(v = n_exact)
-  }
-  return(out)
-}
-
 # Function to summurize the simulation result
 summ_simul <- function(result_name,
                        simul_out,
@@ -421,7 +291,7 @@ For alternative distributions (`mean > 0.1`), the `Z-test` has larger powers tha
 
 However, `GLR-like` and `discrete mixture` tests do not always perform better than the `Z-test`. If the underlying true mean lies between boundaries of null and alternative spaces, both test have weaker power and requires more samples to detect the signal compared to the `Z-test`. Therefore, we recommend to set the boundary of the alternative conservatively in practice. 
 
-```{r tables_G}
+```{r tables_G, cache = TRUE}
 # Gaussian simulation
 set.seed(1)
 f_simul <- function(mu) {
@@ -429,10 +299,14 @@ f_simul <- function(mu) {
                     mu_true = mu,
                     mu_0 = 0,
                     alpha = 0.1,
-                    beta = 0.9,
+                    beta = 0.1,
                     B = 100,
                     print_progress = FALSE,
-                    print_result = FALSE)
+                    print_result = FALSE,
+                    sample_generator = G_sample,
+                    power_fn = G_pwr,
+                    fixed_test_fn = z_test,
+                    seq_test_fn = seq_G_test_generator)
   return(out)
 }
 
@@ -474,7 +348,7 @@ However, as same as the Gaussian case, `GLR-like` and `discrete mixture` tests d
 
 
 
-```{r tables_ber, results='asis'}
+```{r tables_ber, cache = TRUE}
 # Bernoulli simulation
 set.seed(1)
 f_simul <- function(mu) {
@@ -482,7 +356,7 @@ f_simul <- function(mu) {
                     mu_true = mu,
                     mu_0 = 0.1,
                     alpha = 0.1,
-                    beta = 0.9,
+                    beta = 0.1,
                     B = 100,
                     print_progress = FALSE,
                     print_result = FALSE,
