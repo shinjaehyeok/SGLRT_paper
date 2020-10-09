@@ -8,7 +8,10 @@
 <!-- badges: end -->
 
 `SGLRT` is a R package implementation of Sequential Generalized
-Likelihood Ratio (GLR)-like Tests and confidence sequences in **Paper**.
+Likelihood Ratio (GLR)-like Tests and confidence sequences in
+
+J. Shin, A. Ramdas, A. Rinaldo (2020), *Nonparametric iterated-logarithm
+extensions to Lorden’s treatment of the sequential GLRT*.
 
 ## Installation
 
@@ -27,7 +30,7 @@ install.packages("SGLRT")
 ```
 -->
 
-## How to reproduce all plots and simulation results in **paper**.
+## How to reproduce all plots and simulation results in SRR’20.
 
 To reproduce plots, you need to install `latex2exp` package which parses
 and converts LaTeX math formulas to R’s plotmath expressions. It is is
@@ -219,7 +222,7 @@ compared performances of sequential `GLR-like` and `Discrete mixture`
 tests to standard fixed sample size based tests for Gaussian and
 Bernoulli observations. In this document, we repeated the simulation
 only `100` times to save the computation time but, in the paper, the
-simulation result based on `2000` times repeatation is presented.
+simulation result based on `2000` times repetition is presented.
 
 ``` r
 # Type 1 and Type 2 error control simulation
@@ -289,7 +292,7 @@ ber_sample <- function(n, mu_true){
   rbinom(n, 1, prob = mu_true)
 }
 
-# Function to summurize the simulation result
+# Function to summarize the simulation result
 summ_simul <- function(result_name,
                        simul_out,
                        mu_true_vec){
@@ -379,7 +382,7 @@ early_stop_ratio_G <- summ_simul("early_stop_ratio",
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sat Oct  3 01:44:31 2020 -->
+<!-- Thu Oct  8 21:51:41 2020 -->
 
 <table border="1">
 
@@ -671,7 +674,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sat Oct  3 01:44:31 2020 -->
+<!-- Thu Oct  8 21:51:41 2020 -->
 
 <table border="1">
 
@@ -921,7 +924,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sat Oct  3 01:44:32 2020 -->
+<!-- Thu Oct  8 21:51:41 2020 -->
 
 <table border="1">
 
@@ -1205,7 +1208,7 @@ early_stop_ratio_ber <- summ_simul("early_stop_ratio",
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sat Oct  3 01:46:19 2020 -->
+<!-- Thu Oct  8 21:51:41 2020 -->
 
 <table border="1">
 
@@ -1497,7 +1500,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sat Oct  3 01:46:19 2020 -->
+<!-- Thu Oct  8 21:51:41 2020 -->
 
 <table border="1">
 
@@ -1747,7 +1750,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sat Oct  3 01:46:19 2020 -->
+<!-- Thu Oct  8 21:51:41 2020 -->
 
 <table border="1">
 
