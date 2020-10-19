@@ -10,8 +10,9 @@
 `SGLRT` is a R package implementation of Sequential Generalized
 Likelihood Ratio (GLR)-like Tests and confidence sequences in
 
-J. Shin, A. Ramdas, A. Rinaldo (2020), *Nonparametric iterated-logarithm
-extensions to Lorden’s treatment of the sequential GLRT*.
+**Nonparametric iterated-logarithm extensions to Lorden’s treatment of
+the sequential GLRT**  
+J. Shin, A. Ramdas, A. Rinaldo [arXiv](https://arxiv.org/abs/2010.08082)
 
 ## Installation
 
@@ -382,7 +383,7 @@ early_stop_ratio_G <- summ_simul("early_stop_ratio",
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  8 21:51:41 2020 -->
+<!-- Sun Oct 18 20:08:56 2020 -->
 
 <table border="1">
 
@@ -674,7 +675,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  8 21:51:41 2020 -->
+<!-- Sun Oct 18 20:08:56 2020 -->
 
 <table border="1">
 
@@ -924,7 +925,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  8 21:51:41 2020 -->
+<!-- Sun Oct 18 20:08:56 2020 -->
 
 <table border="1">
 
@@ -1208,7 +1209,7 @@ early_stop_ratio_ber <- summ_simul("early_stop_ratio",
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  8 21:51:41 2020 -->
+<!-- Sun Oct 18 20:08:56 2020 -->
 
 <table border="1">
 
@@ -1500,7 +1501,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  8 21:51:41 2020 -->
+<!-- Sun Oct 18 20:08:56 2020 -->
 
 <table border="1">
 
@@ -1750,7 +1751,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Thu Oct  8 21:51:41 2020 -->
+<!-- Sun Oct 18 20:08:56 2020 -->
 
 <table border="1">
 

@@ -20,7 +20,8 @@ knitr::opts_chunk$set(
 
 `SGLRT` is a R package implementation of Sequential Generalized Likelihood Ratio (GLR)-like Tests and confidence sequences in 
 
-J. Shin, A. Ramdas, A. Rinaldo (2020), *Nonparametric iterated-logarithm extensions to Lorden’s treatment of the sequential GLRT*.
+__Nonparametric iterated-logarithm extensions to Lorden's treatment of the sequential GLRT__  
+J. Shin, A. Ramdas, A. Rinaldo  [arXiv](https://arxiv.org/abs/2010.08082)   
 
 
 ## Installation
