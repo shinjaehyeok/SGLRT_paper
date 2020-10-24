@@ -42,7 +42,7 @@ install.packages("SGLRT")
 
 ## How to reproduce all plots and simulation results in SRR'20.
 
-To reproduce plots, you need to install `latex2exp` package which parses and converts LaTeX math formulas to R’s plotmath expressions. It is is not installed, you can run the following command to install is.
+To reproduce plots, you need to install `latex2exp` package which parses and converts LaTeX math formulas to R’s plotmath expressions. If is is not yet installed, you can run the following command to install is.
 ``` r
 install.packages("latex2exp")
 ```
@@ -88,7 +88,7 @@ legend("topleft",
 
 ### 2. Ratio of CI's width to CLT *(Fig. 5 in Section IV-C)*
 
-The following Rcode reproduces the Fig. 5 in Section IV-C in which we compared ratios of widths of confidence intervals to the pointwise and asymptotically valid normal confidence intervals based on the central limit theorem. To be specific, `Chernoff` is the nonasymptotic but pointwise valid confidence interval based on the Chernoff bound. `Stitching (HRMS'20)` and `Normal Mix. (HRMS'20)` are nonasymptotic and anytime-valid confidence intervals presented by [Howard et al., (2020+)](https://arxiv.org/abs/1810.08240).  `GLR-like  (Ours)` and `Discrete Mix. (Ours)` are two nonasymptotic and anytime-valid confidence intervals proposed in our paper.   `GLR-like` confidence intervals are based on the GLR statistics and its nonparametric extension, called GLR-like statistics. `GLR-like` confidence intervals are time-uniformly close to the Chrenoff bound on any given target time interval. `Discrete Mix.` confidence intervals are refined version of `GLR-like` ones. From the construction, `Discrete Mix.` confidence intervals are always tighter than their corresponding `GLR-like` confidence intervals. In the following plots, we use two different target time intervals to build `GLR-like` and `Discrete Mix.` confidence intervals. 
+The following Rcode reproduces the Fig. 5 in Section IV-C in which we compared ratios of widths of confidence intervals to the pointwise and asymptotically valid normal confidence intervals based on the central limit theorem. To be specific, `Chernoff` is the nonasymptotic but pointwise valid confidence interval based on the Chernoff bound. `Stitching` and `Normal Mix.` are nonasymptotic and anytime-valid confidence intervals presented in [Howard et al., (2020+)](https://arxiv.org/abs/1810.08240).  `GLR-like  (Ours)` and `Discrete Mix. (Ours)` are two nonasymptotic and anytime-valid confidence intervals proposed in our paper.   `GLR-like` confidence intervals are based on the GLR statistics and its nonparametric extension, called GLR-like statistics. `GLR-like` confidence intervals are time-uniformly close to the Chrenoff bound on any given target time interval. `Discrete Mix.` confidence intervals are refined version of `GLR-like` ones. From the construction, `Discrete Mix.` confidence intervals are always tighter than their corresponding `GLR-like` confidence intervals. In the following plots, we use two different target time intervals to build `GLR-like` and `Discrete Mix.` confidence intervals. 
 
 
 ```{r Fig.5}
@@ -190,7 +190,7 @@ for (i in seq_along(ours_list_2)){
 }
 legend_lty <- c(legend_lty, rep(4, length(ours_list_2)))
 abline(v = c(nmin1, nmin2, nmax1, nmax2), lty = 3)
-bounds_name <- c("Chernoff", "Stitching (HRMS'20)", "Normal Mix. (HRMS'20)",
+bounds_name <- c("Chernoff", "Stitching", "Normal Mix.",
                  "GLR-like 1 (Ours)", "Discrete Mix. 1 (Ours)",
                  "GLR-like 2 (Ours)", "Discrete Mix. 2 (Ours)")
 legend("topright", bounds_name,

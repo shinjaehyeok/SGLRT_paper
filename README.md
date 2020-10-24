@@ -34,8 +34,8 @@ install.packages("SGLRT")
 ## How to reproduce all plots and simulation results in SRR’20.
 
 To reproduce plots, you need to install `latex2exp` package which parses
-and converts LaTeX math formulas to R’s plotmath expressions. It is is
-not installed, you can run the following command to install is.
+and converts LaTeX math formulas to R’s plotmath expressions. If is is
+not yet installed, you can run the following command to install is.
 
 ``` r
 install.packages("latex2exp")
@@ -91,8 +91,8 @@ compared ratios of widths of confidence intervals to the pointwise and
 asymptotically valid normal confidence intervals based on the central
 limit theorem. To be specific, `Chernoff` is the nonasymptotic but
 pointwise valid confidence interval based on the Chernoff bound.
-`Stitching (HRMS'20)` and `Normal Mix. (HRMS'20)` are nonasymptotic and
-anytime-valid confidence intervals presented by [Howard et al.,
+`Stitching` and `Normal Mix.` are nonasymptotic and anytime-valid
+confidence intervals presented in [Howard et al.,
 (2020+)](https://arxiv.org/abs/1810.08240). `GLR-like (Ours)` and
 `Discrete Mix. (Ours)` are two nonasymptotic and anytime-valid
 confidence intervals proposed in our paper. `GLR-like` confidence
@@ -205,7 +205,7 @@ for (i in seq_along(ours_list_2)){
 }
 legend_lty <- c(legend_lty, rep(4, length(ours_list_2)))
 abline(v = c(nmin1, nmin2, nmax1, nmax2), lty = 3)
-bounds_name <- c("Chernoff", "Stitching (HRMS'20)", "Normal Mix. (HRMS'20)",
+bounds_name <- c("Chernoff", "Stitching", "Normal Mix.",
                  "GLR-like 1 (Ours)", "Discrete Mix. 1 (Ours)",
                  "GLR-like 2 (Ours)", "Discrete Mix. 2 (Ours)")
 legend("topright", bounds_name,
@@ -383,7 +383,7 @@ early_stop_ratio_G <- summ_simul("early_stop_ratio",
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sun Oct 18 20:08:56 2020 -->
+<!-- Sat Oct 24 00:21:03 2020 -->
 
 <table border="1">
 
@@ -675,7 +675,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sun Oct 18 20:08:56 2020 -->
+<!-- Sat Oct 24 00:21:03 2020 -->
 
 <table border="1">
 
@@ -925,7 +925,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sun Oct 18 20:08:56 2020 -->
+<!-- Sat Oct 24 00:21:03 2020 -->
 
 <table border="1">
 
@@ -1209,7 +1209,7 @@ early_stop_ratio_ber <- summ_simul("early_stop_ratio",
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sun Oct 18 20:08:56 2020 -->
+<!-- Sat Oct 24 00:21:04 2020 -->
 
 <table border="1">
 
@@ -1501,7 +1501,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sun Oct 18 20:08:56 2020 -->
+<!-- Sat Oct 24 00:21:04 2020 -->
 
 <table border="1">
 
@@ -1751,7 +1751,7 @@ exact\_test
 
 <!-- html table generated in R 4.0.2 by xtable 1.8-4 package -->
 
-<!-- Sun Oct 18 20:08:56 2020 -->
+<!-- Sat Oct 24 00:21:04 2020 -->
 
 <table border="1">
 
